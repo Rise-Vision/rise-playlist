@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>rise-playlist Demo</title>
+
+  <script src="../webcomponentsjs/webcomponents.min.js"></script>
+  <link rel="import" href="rise-playlist.html">
+  <link rel="import" href="test/rise-demo.html">
+
+</head>
+<body>
+  <rise-playlist>
+    <rise-playlist-item>
+       <rise-demo id="demo"></rise-demo>
+    </rise-playlist-item>
+  </rise-playlist>
+
+  <script>
+    var demo = document.getElementById("demo");
+
+    window.addEventListener("polymer-ready", function() {
+      demo.onReady();
+    });
+  </script>
+</body>
+</html>

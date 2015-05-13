@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Single Playlist Item</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-playlist.html">
+  <link rel="import" href="rise-demo.html">
+</head>
+<body>
+  <rise-playlist id="playlist">
+
+    <rise-playlist-item>
+      <rise-demo id="single">
+        <nested-element></nested-element>
+      </rise-demo>
+    </rise-playlist-item>
+
+  </rise-playlist>
+
+  <script>
+    suite("rise-playlist", function() {
+      var clock = sinon.useFakeTimers(),
+        playlist = document.querySelector("#playlist"),
+        single = document.querySelector("#single"),
+        readySpy;
+
+      suiteSetup(function() {
+        readySpy = sinon.spy(playlist, "handleReady");
+      });
+
+      suiteTeardown(function() {
+        clock.restore();
+      });
+
+      suite("start", function() {
+        test("should not call ready event handler after the loading timer has expired", function() {
+          clock.tick(30000);
+          single.onReady();
+
+          assert(readySpy.notCalled);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
