@@ -1,0 +1,39 @@
+<link rel="import" href="../../polymer/polymer.html">
+
+<polymer-element name="rise-demo">
+<script>
+    /* global Polymer */
+    /*jshint newcap: false */
+    Polymer("rise-demo", {
+      onReady: function() {
+        var readyEvent = new CustomEvent("rise-component-ready", {
+          "detail": {
+            "play": this.play,
+            "pause": this.pause,
+            "stop": this.stop,
+            "done": true
+          },
+          "bubbles": true
+        });
+
+        this.dispatchEvent(readyEvent);
+      },
+
+      play: function() {
+        this.dispatchEvent(new CustomEvent("rise-demo-play", { "bubbles": true }));
+      },
+
+      pause: function() {
+        this.dispatchEvent(new CustomEvent("rise-demo-pause", { "bubbles": true }));
+      },
+
+      stop: function() {
+        this.dispatchEvent(new CustomEvent("rise-demo-stop", { "bubbles": true }));
+      },
+
+      done: function() {
+        this.dispatchEvent(new CustomEvent("rise-component-done", { "bubbles": true }));
+      }
+    });
+  </script>
+</polymer-element>

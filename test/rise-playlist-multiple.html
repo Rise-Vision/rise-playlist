@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Multiple Playlist Items</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-playlist.html">
+  <link rel="import" href="rise-demo.html">
+</head>
+<body>
+  <rise-playlist id="playlist">
+
+    <rise-playlist-item>
+      <rise-demo id="first">
+        <nested-element></nested-element>
+      </rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item>
+      <rise-demo id="second"></rise-demo>
+    </rise-playlist-item>
+
+    Ignore this text.
+  </rise-playlist>
+
+  <script>
+    suite("rise-playlist", function() {
+      var clock = sinon.useFakeTimers(),
+        playlist = document.querySelector("#playlist"),
+        first = document.querySelector("#first"),
+        second = document.querySelector("#second"),
+        firstSpy, secondSpy;
+
+      suiteSetup(function() {
+        firstSpy = sinon.spy(first, "play");
+        secondSpy = sinon.spy(second, "play");
+      });
+
+      suiteTeardown(function() {
+        clock.restore();
+      });
+
+      suite("attached", function() {
+        test("should set the total number of playlist items", function() {
+          assert.equal(playlist.totalItems, 2);
+        });
+
+        test("should start the loading timer", function() {
+          assert.isNumber(playlist.loadingTimeout);
+        });
+      });
+
+      suite("handleReady", function() {
+        var timerSpy, readySpy;
+
+        test("should add an item to the items property", function() {
+          first.onReady();
+
+          assert.equal(playlist.items.length, 1);
+        });
+
+        test("should store the id", function() {
+          assert.equal(playlist.items[0].id, "first");
+        });
+
+        test("should store the element", function() {
+          assert.isObject(playlist.items[0].element);
+        });
+
+        test("should store the play function", function() {
+          assert.isFunction(playlist.items[0].play);
+        });
+
+        test("should store the pause function", function() {
+          assert.isFunction(playlist.items[0].pause);
+        });
+
+        test("should store the stop function", function() {
+          assert.isFunction(playlist.items[0].stop);
+        });
+
+        test("should store done", function() {
+          assert.isBoolean(playlist.items[0].done);
+        });
+
+        test("should increment numItems", function() {
+          assert.equal(playlist.numItems, 1);
+        });
+
+        test("should not add an item to the items property if it already exists", function() {
+          first.onReady();
+
+          assert.equal(playlist.items.length, 1);
+        });
+
+        test("should clear loading timer once all playlist items are ready", function() {
+          timerSpy = sinon.spy(playlist, "start");
+
+          second.onReady();
+          clock.tick(300000);
+
+          assert(timerSpy.notCalled);
+        });
+
+        test("should not call ready event handler again once all playlist items are ready", function() {
+          readySpy = sinon.spy(playlist, "handleReady");
+
+          second.onReady();
+          assert(readySpy.notCalled);
+        });
+      });
+
+      suite("handleDone", function() {
+        test("should play next playlist item", function() {
+          first.done();
+
+          assert(secondSpy.calledOnce);
+        });
+
+        test("should show next playlist item", function() {
+          assert.equal(second.style.visibility, "visible");
+        });
+
+        test("should hide current playlist item", function() {
+          assert.equal(first.style.visibility, "hidden");
+        });
+
+        test("should play first playlist item when last playlist item has finished", function() {
+          second.done();
+
+          assert(firstSpy.calledOnce);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

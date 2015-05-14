@@ -1,0 +1,166 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script src="../underscore/underscore.js"></script>
+
+<polymer-element name="rise-playlist">
+  <template>
+    <content id="items" select="rise-playlist-item"></content>
+  </template>
+
+  <script>
+    /* global Polymer, _ */
+    /*jshint newcap: false */
+    Polymer("rise-playlist", {
+      /**
+       * The playlist items that have reported as being ready.
+       *
+       * @property items
+       * @type object
+       * @default null
+       */
+      items: null,
+
+      /**
+       * The total number of playlist items.
+       *
+       * @property totalItems
+       * @type number
+       * @default 0
+       */
+      totalItems: 0,
+
+      /**
+       * The number of playlist items that have reported as being ready.
+       *
+       * @property numItems
+       * @type number
+       * @default 0-
+       */
+      numItems: 0,
+
+      /**
+       * The ID of the timeout that fires if not all playlist items have reported ready after
+       * a specified delay.
+       *
+       * @property loadingTimeout
+       * @type number
+       * @default 0
+       */
+      loadingTimeout: 0,
+
+      /**
+       * The delay (in ms) for the timeout that fires if not all playlist items have reported ready.
+       *
+       * @property loadingDelay
+       * @type number
+       * @default 30000
+       */
+      loadingDelay: 30000,
+
+      /************************************** INITIALIZATION **************************************/
+
+      /**
+       * An instance of the element was inserted into the DOM.
+       */
+      attached: function() {
+        var self = this,
+          nodes = this.$.items.getDistributedNodes();
+
+        for (var i = 0; i < nodes.length; i++) {
+          if (nodes[i].nodeType === 1) {
+            this.totalItems++;
+          }
+        }
+
+        this.items = [];
+        this.addEventListener("rise-component-ready", this.handleReady, false);
+        this.addEventListener("rise-component-done", this.handleDone);
+
+        this.loadingTimeout = setTimeout(function() {
+          self.start();
+        }, this.loadingDelay);
+      },
+
+      /**
+       * Remove the event listener so that it won't be triggered by late-loading playlist items.
+       */
+      start: function() {
+        this.removeEventListener("rise-component-ready", this.handleReady, false);
+      },
+
+      /***************************************** PLAYBACK *****************************************/
+
+      /**
+       * Add the playlist item to the items map if it does not already exist.
+       */
+      handleReady: function(e) {
+        var component = {};
+
+        // Playlist item has already been added.
+        if (_.findWhere(this.items, { id: e.target.id }) !== undefined) {
+          return;
+        }
+
+        component.id = e.target.id;
+        component.element = e.target;
+
+        if (e.detail) {
+          if (e.detail.play) {
+            component.play = e.detail.play;
+          }
+
+          if (e.detail.pause) {
+            component.pause = e.detail.pause;
+          }
+
+          if (e.detail.stop) {
+            component.stop = e.detail.stop;
+          }
+
+          if (e.detail.done) {
+            component.done = e.detail.done;
+          }
+        }
+
+        this.items.push(component);
+        this.numItems++;
+
+        if (this.numItems === this.totalItems) {
+          clearTimeout(this.loadingTimeout);
+          this.removeEventListener("rise-component-ready", this.handleReady);
+        }
+      },
+
+      /**
+       * Play the next item in the playlist.
+       */
+      handleDone: function(e) {
+        var i = 0,
+          nextIndex,
+          component,
+          itemsLength = this.items.length;
+
+        // Hide all playlist items.
+        for (i; i < itemsLength; i++) {
+          this.items[i].element.style.visibility = "hidden";
+        }
+
+        for (i = 0; i < itemsLength; i++) {
+          // Current playlist item
+          if (this.items[i].id === e.target.id) {
+            // Next playlist item
+            nextIndex = (i + 1 < itemsLength) ? (i + 1): 0;
+            component = this.items[nextIndex];
+            component.element.style.visibility = "visible";
+
+            if (component.hasOwnProperty("play")) {
+              component.play.call(component.element);
+            }
+
+            break;
+          }
+        }
+      }
+    });
+  </script>
+</polymer-element>
