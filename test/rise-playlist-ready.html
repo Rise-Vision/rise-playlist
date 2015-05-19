@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Playlist Items - Ready</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-playlist.html">
+  <link rel="import" href="rise-demo.html">
+</head>
+<body>
+  <rise-playlist id="playlist">
+
+    <rise-playlist-item>
+      <rise-demo id="first">
+        <nested-element></nested-element>
+      </rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item>
+      <rise-demo id="second"></rise-demo>
+    </rise-playlist-item>
+
+    Ignore this text.
+  </rise-playlist>
+
+  <script>
+    suite("playlist items ready", function() {
+      var clock = sinon.useFakeTimers(),
+        playlist = document.querySelector("#playlist"),
+        first = document.querySelector("#first"),
+        second = document.querySelector("#second"),
+        spy = null,
+        playSpy = null,
+        pauseSpy = null,
+        stopSpy = null;
+
+      suiteTeardown(function() {
+        clock.restore();
+      });
+
+      suite("attached", function() {
+        test("should set the total number of playlist items", function() {
+          assert.equal(playlist.totalItems, 2);
+        });
+
+        test("should start the loading timer", function() {
+          assert.isNumber(playlist.loadingTimeout);
+        });
+      });
+
+      suite("handleReady", function() {
+        suiteTeardown(function() {
+          playlist.handleReady.restore();
+        });
+
+        test("should add an item to the items property", function() {
+          second.onReady();
+
+          assert.equal(playlist.items.length, 1);
+        });
+
+        test("should store the id", function() {
+          assert.equal(playlist.items[0].id, "second");
+        });
+
+        test("should store the element", function() {
+          assert.isObject(playlist.items[0].element);
+        });
+
+        test("should store the play function", function() {
+          assert.isFunction(playlist.items[0].play);
+        });
+
+        test("should store the pause function", function() {
+          assert.isFunction(playlist.items[0].pause);
+        });
+
+        test("should store the stop function", function() {
+          assert.isFunction(playlist.items[0].stop);
+        });
+
+        test("should store done", function() {
+          assert.isBoolean(playlist.items[0].done);
+        });
+
+        test("should increment numItems", function() {
+          assert.equal(playlist.numItems, 1);
+        });
+
+        test("should not add an item to the items property if it already exists", function() {
+          second.onReady();
+
+          assert.equal(playlist.items.length, 1);
+        });
+
+        test("should sort the items array in the same order as the playlist items appear in the playlist", function() {
+          first.onReady();
+          clock.tick(30000);
+
+          assert.equal(playlist.items[0].id, "first", "first playlist item");
+          assert.equal(playlist.items[1].id, "second", "second playlist item");
+        });
+
+        test("should not call ready event handler again once all playlist items are ready", function() {
+          spy = sinon.spy(playlist, "handleReady");
+          first.onReady();
+
+          assert(spy.notCalled);
+        });
+      });
+
+      suite("handleDone", function() {
+        suiteSetup(function() {
+          playSpy = sinon.spy(playlist.items[1], "play");
+        });
+
+        suiteTeardown(function() {
+          playlist.items[0].play.restore();
+          playlist.items[1].play.restore();
+        });
+
+        test("should play next playlist item", function() {
+          first.done();
+
+          assert(playSpy.calledOnce);
+        });
+
+        test("should show next playlist item", function() {
+          assert.equal(second.style.visibility, "visible");
+        });
+
+        test("should hide current playlist item", function() {
+          assert.equal(first.style.visibility, "hidden");
+        });
+
+        test("should play first playlist item when last playlist item has finished", function() {
+          playSpy = sinon.spy(playlist.items[0], "play");
+          second.done();
+
+          assert(playSpy.calledOnce);
+        });
+      });
+
+      suite("play", function() {
+        suiteSetup(function() {
+          playSpy = sinon.spy(playlist.items[0], "play");
+        });
+
+        suiteTeardown(function() {
+          playlist.items[0].play.restore();
+        });
+
+        test("should play playlist item", function() {
+          playlist.play(0);
+
+          assert(playSpy.calledOnce);
+        });
+
+        test("should show playlist item when played", function() {
+          assert.equal(first.style.visibility, "visible");
+        });
+
+        test("should hide all other playlist items", function() {
+          assert.equal(second.style.visibility, "hidden");
+        });
+      });
+
+      suite("playNext", function() {
+        suiteSetup(function() {
+          pauseSpy = sinon.spy(playlist.items[0], "pause");
+          playSpy = sinon.spy(playlist.items[1], "play");
+          stopSpy = sinon.spy(playlist.items[1], "stop");
+        });
+
+        suiteTeardown(function() {
+          playlist.items[0].pause.restore();
+          playlist.items[1].play.restore();
+          playlist.items[0].play.restore();
+          playlist.items[1].stop.restore();
+        });
+
+        test("should pause playlist item", function() {
+          playlist.playNext(0, "pause");
+
+          assert(pauseSpy.calledOnce);
+        });
+
+        test("should play next playlist item when paused", function() {
+          assert(playSpy.calledOnce);
+        });
+
+        test("should stop playlist item", function() {
+          playSpy = sinon.spy(playlist.items[0], "play");
+          playlist.playNext(1, "stop");
+
+          assert(stopSpy.calledOnce);
+        });
+
+        test("should play next playlist item when stopped", function() {
+          assert(playSpy.calledOnce);
+        });
+      });
+
+      suite("pause", function() {
+        suiteSetup(function() {
+          pauseSpy = sinon.spy(playlist.items[0], "pause");
+          playSpy = sinon.spy(playlist.items[1], "play");
+        });
+
+        suiteTeardown(function() {
+          playlist.items[0].pause.restore();
+          playlist.items[1].play.restore();
+        });
+
+        test("should pause the current playlist item", function() {
+          playlist.pause(0);
+
+          assert(pauseSpy.calledOnce);
+        });
+
+        test("should play the next playlist item", function() {
+          assert(playSpy.calledOnce);
+        });
+      });
+
+      suite("stop", function() {
+        suiteSetup(function() {
+          stopSpy = sinon.spy(playlist.items[0], "stop");
+          playSpy = sinon.spy(playlist.items[1], "play");
+        });
+
+        suiteTeardown(function() {
+          playlist.items[0].stop.restore();
+          playlist.items[1].play.restore();
+        });
+
+        test("should stop the current playlist item", function() {
+          playlist.stop(0);
+
+          assert(stopSpy.calledOnce);
+        });
+
+        test("should play the next playlist item", function() {
+          assert(playSpy.calledOnce);
+        });
+      });
+
+      suite("hide", function() {
+        test("should hide all playlist items", function() {
+          playlist.hide();
+
+          assert.equal(playlist.items[0].element.style.visibility, "hidden", "first item");
+          assert.equal(playlist.items[1].element.style.visibility, "hidden", "second item");
+        });
+      });
+
+      suite("sendCommand", function() {
+        suiteSetup(function() {
+          playSpy = sinon.spy(playlist.items[0], "play");
+          pauseSpy = sinon.spy(playlist.items[0], "pause");
+          stopSpy = sinon.spy(playlist.items[0], "stop");
+        });
+
+        suiteTeardown(function() {
+          playlist.items[0].play.restore();
+          playlist.items[0].pause.restore();
+          playlist.items[0].stop.restore();
+        });
+
+        test("should play a playlist item", function() {
+          playlist.sendCommand(playlist.items[0], "play");
+
+          assert(playSpy.calledOnce);
+        });
+
+        test("should pause a playlist item", function() {
+          playlist.sendCommand(playlist.items[0], "pause");
+
+          assert(pauseSpy.calledOnce);
+        });
+
+        test("should stop a playlist item", function() {
+          playlist.sendCommand(playlist.items[0], "stop");
+
+          assert(stopSpy.calledOnce);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
