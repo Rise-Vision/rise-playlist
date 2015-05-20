@@ -131,11 +131,11 @@
         });
 
         test("should show next playlist item", function() {
-          assert.equal(second.style.visibility, "visible");
+          assert.equal(second.style.display, "block");
         });
 
         test("should hide current playlist item", function() {
-          assert.equal(first.style.visibility, "hidden");
+          assert.equal(first.style.display, "none");
         });
 
         test("should play first playlist item when last playlist item has finished", function() {
@@ -162,11 +162,11 @@
         });
 
         test("should show playlist item when played", function() {
-          assert.equal(first.style.visibility, "visible");
+          assert.equal(first.style.display, "block");
         });
 
         test("should hide all other playlist items", function() {
-          assert.equal(second.style.visibility, "hidden");
+          assert.equal(second.style.display, "none");
         });
       });
 
@@ -254,8 +254,8 @@
         test("should hide all playlist items", function() {
           playlist.hide();
 
-          assert.equal(playlist.items[0].element.style.visibility, "hidden", "first item");
-          assert.equal(playlist.items[1].element.style.visibility, "hidden", "second item");
+          assert.equal(playlist.items[0].element.style.display, "none", "first item");
+          assert.equal(playlist.items[1].element.style.display, "none", "second item");
         });
       });
 

@@ -174,7 +174,7 @@
           this.hide();
 
           // Show the current playlist item.
-          item.element.style.visibility = "visible";
+          item.element.style.display = "block";
 
           // Play the next item after the current one has completed.
           if (duration !== null) {
@@ -254,7 +254,7 @@
        */
       hide: function() {
         for (var i = 0; i < this.items.length; i++) {
-          this.items[i].element.style.visibility = "hidden";
+          this.items[i].element.style.display = "none";
         }
       },
 
