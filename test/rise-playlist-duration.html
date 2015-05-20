@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Playlist Items - Duration</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-playlist.html">
+  <link rel="import" href="../../web-component-rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="rise-demo.html">
+</head>
+<body>
+  <rise-playlist id="playlist">
+
+    <rise-playlist-item duration="10">
+      <rise-demo id="first">
+        <nested-element></nested-element>
+      </rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="5">
+      <rise-demo id="second"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="invalid">
+      <rise-demo id="third"></rise-demo>
+    </rise-playlist-item>
+
+  </rise-playlist>
+
+  <script>
+    suite("duration", function() {
+      var clock = sinon.useFakeTimers(),
+        playlist = document.querySelector("#playlist"),
+        first = document.querySelector("#first"),
+        second = document.querySelector("#second"),
+        third = document.querySelector("#third"),
+        firstSpy = null,
+        secondSpy = null,
+        thirdSpy = null;
+
+      suiteSetup(function() {
+        first.onReady();
+        firstSpy = sinon.spy(playlist.items[0], "play");
+
+        second.onReady();
+        secondSpy = sinon.spy(playlist.items[1], "play");
+
+        third.onReady();
+        thirdSpy = sinon.spy(playlist.items[2], "play");
+      });
+
+      suiteTeardown(function() {
+        clock.restore();
+
+        playlist.items[0].play.restore();
+        playlist.items[1].play.restore();
+        playlist.items[2].play.restore();
+      });
+
+      test("should play first item for 10 seconds followed by second item", function() {
+        assert(firstSpy.calledOnce, "first item is playing");
+
+        clock.tick(9999);
+
+        assert(secondSpy.notCalled, "second item is not yet playing");
+
+        clock.tick(1);
+
+        assert(secondSpy.calledOnce, "second item is playing");
+      });
+
+      test("should play second item for 5 seconds followed by third item", function() {
+        clock.tick(4999);
+
+        assert(thirdSpy.notCalled, "third item is not yet playing");
+
+        clock.tick(1);
+
+        assert(thirdSpy.calledOnce, "third item is playing");
+      });
+    });
+  </script>
+</body>
+</html>

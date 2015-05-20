@@ -73,7 +73,7 @@
         }
 
         this.addEventListener("rise-component-ready", this.handleReady, false);
-        this.addEventListener("rise-component-done", this.handleDone);
+        this.addEventListener("rise-component-done", this.handleDone, false);
 
         this.loadingTimeout = setTimeout(function() {
           self.start();
@@ -132,6 +132,8 @@
           this.start();
           clearTimeout(this.loadingTimeout);
         }
+
+        e.stopPropagation();
       },
 
       /**
@@ -153,23 +155,38 @@
             break;
           }
         }
+
+        e.stopPropagation();
       },
 
       /**
        * Play a playlist item.
        */
       play: function(index) {
-        var item;
+        var self = this,
+          item = null,
+          duration = null;
 
         if ((index >= 0) && (index < this.items.length)) {
           item = this.items[index];
+          duration = this.$.items.getDistributedNodes()[index].getAttribute("duration");
 
           this.hide();
 
           // Show the current playlist item.
           item.element.style.visibility = "visible";
 
-          // Play the current playlist item.
+          // Play the next item after the current one has completed.
+          if (duration !== null) {
+            duration = parseInt(duration, 10);
+
+            if (!isNaN(duration)) {
+              setTimeout(function() {
+                self.playNext(index, "pause");
+              }, duration * 1000);
+            }
+          }
+
           this.sendCommand(item, "play");
         }
       },
