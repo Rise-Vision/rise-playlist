@@ -116,17 +116,23 @@
 
       suite("handleDone", function() {
         suiteSetup(function() {
+          pauseSpy = sinon.spy(playlist.items[0], "pause");
           playSpy = sinon.spy(playlist.items[1], "play");
         });
 
         suiteTeardown(function() {
           playlist.items[0].play.restore();
+          playlist.items[0].pause.restore();
           playlist.items[1].play.restore();
         });
 
-        test("should play next playlist item", function() {
+        test("should pause current playlist item", function() {
           first.done();
 
+          assert(pauseSpy.calledOnce);
+        });
+
+        test("should play next playlist item", function() {
           assert(playSpy.calledOnce);
         });
 
