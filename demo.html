@@ -6,7 +6,7 @@
 
   <script src="../webcomponentsjs/webcomponents.min.js"></script>
   <link rel="import" href="rise-playlist.html">
-  <link rel="import" href="test/rise-demo.html">
+  <link rel="import" href="demo-component.html">
 
   <style>
 
@@ -16,32 +16,13 @@
   <rise-playlist>
 
     <rise-playlist-item duration="5">
-       <rise-demo id="apple" src="https://goo.gl/XBnh0j"></rise-demo>
+       <demo-component id="apple" src="https://goo.gl/XBnh0j"></rise-demo>
     </rise-playlist-item>
 
     <rise-playlist-item>
-       <rise-demo id="duck" src="https://goo.gl/fyZFTU"></rise-demo>
+       <demo-component id="duck" src="https://goo.gl/fyZFTU"></rise-demo>
     </rise-playlist-item>
 
   </rise-playlist>
-
-  <script>
-    var apple = document.getElementById("apple"),
-      duck = document.getElementById("duck");
-
-    function play() {
-      // Send done after 10 seconds.
-      setTimeout(function() {
-        duck.done();
-      }, 10000);
-    }
-
-    window.addEventListener("polymer-ready", function() {
-      apple.onReady();
-
-      duck.addEventListener("rise-demo-play", play);
-      duck.onReady();
-    });
-  </script>
 </body>
 </html>

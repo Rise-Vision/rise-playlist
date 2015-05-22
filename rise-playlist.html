@@ -148,10 +148,13 @@
         // Find current playlist item.
         for (var i = 0; i < itemsLength; i++) {
           if (this.items[i].id === e.target.id) {
-            // Get next playlist item.
-            nextIndex = (i + 1 < itemsLength) ? (i + 1): 0;
+            // Pause current playlist item.
+            this.sendCommand(this.items[i], "pause");
 
+            // Play next playlist item.
+            nextIndex = (i + 1 < itemsLength) ? (i + 1): 0;
             this.play(nextIndex);
+
             break;
           }
         }
