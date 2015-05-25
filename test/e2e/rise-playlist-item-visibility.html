@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Playlist - Item Visibility</title>
+
+  <script src="../../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../rise-playlist.html">
+  <link rel="import" href="../../../web-component-rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="../rise-demo.html">
+</head>
+<body>
+  <rise-playlist id="playlist" intro="fade-in" outro="fade-out">
+
+    <rise-playlist-item duration="10">
+      <rise-demo id="first">
+        <nested-element></nested-element>
+      </rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="5">
+      <rise-demo id="second"></rise-demo>
+    </rise-playlist-item>
+
+  </rise-playlist>
+
+  <script>
+    suite("playlist item visibility", function() {
+      var clock = sinon.useFakeTimers(),
+        playlist = document.querySelector("#playlist"),
+        first = document.querySelector("#first"),
+        second = document.querySelector("#second");
+
+      suiteSetup(function() {
+        first.onReady();
+        second.onReady();
+      });
+
+      suiteTeardown(function() {
+        clock.restore();
+      });
+
+      suite("transitions", function() {
+        test("should apply intro class to first playlist item once all items are ready", function() {
+          assert.isTrue(first.classList.contains("fade-in"));
+        });
+
+        test("should apply outro class to first playlist item once it has completed playback", function() {
+          clock.tick(10000);
+
+          assert.isTrue(first.classList.contains("fade-out"));
+        });
+
+        test("should remove intro class from first playlist item once it has completed playback", function() {
+          assert.isFalse(first.classList.contains("fade-in"));
+        });
+
+        test("should apply intro class to next playlist item once first item has completed playback", function() {
+          assert.isTrue(second.classList.contains("fade-in"));
+        });
+
+        test("should remove outro class from next playlist item once first item has completed playback", function() {
+          assert.isFalse(second.classList.contains("fade-out"));
+        });
+      });
+
+      suite("no transitions", function() {
+        suiteSetup(function() {
+          playlist.removeAttribute("intro");
+          playlist.removeAttribute("outro");
+          clock.tick(5000);
+        });
+
+        test("should hide second playlist item by setting its display property", function() {
+          assert.equal(second.style.display, "none");
+        });
+
+        test("should show first playlist item by setting its display property", function() {
+          assert.equal(first.style.display, "block");
+        });
+      });
+    });
+  </script>
+</body>
+</html>
