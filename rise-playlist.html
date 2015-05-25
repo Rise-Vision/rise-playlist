@@ -2,7 +2,7 @@
 
 <script src="../underscore/underscore.js"></script>
 
-<polymer-element name="rise-playlist">
+<polymer-element name="rise-playlist" attributes="intro outro">
   <template>
     <content id="items" select="rise-playlist-item"></content>
   </template>
@@ -11,6 +11,24 @@
     /* global Polymer, _ */
     /*jshint newcap: false */
     Polymer("rise-playlist", {
+      /**
+       * The CSS class name for an intro transition.
+       *
+       * @attribute intro
+       * @type string
+       * @default ""
+       */
+      intro: "",
+
+      /**
+       * The CSS class name for an outro transition.
+       *
+       * @attribute outro
+       * @type string
+       * @default ""
+       */
+      outro: "",
+
       /**
        * The playlist items that have reported as being ready.
        *
@@ -141,18 +159,20 @@
        */
       handleDone: function(e) {
         var nextIndex,
+          item = null,
           itemsLength = this.items.length;
 
-        this.hide();
-
         // Find current playlist item.
-        for (var i = 0; i < itemsLength; i++) {
-          if (this.items[i].id === e.target.id) {
-            // Pause current playlist item.
-            this.sendCommand(this.items[i], "pause");
+        for (var index = 0; index < itemsLength; index++) {
+          if (this.items[index].id === e.target.id) {
+            item = this.items[index];
+            nextIndex = (index + 1 < itemsLength) ? (index + 1): 0;
 
-            // Play next playlist item.
-            nextIndex = (i + 1 < itemsLength) ? (i + 1): 0;
+            // Current playlist item
+            this.hide(index);
+            this.sendCommand(item, "pause");
+
+            // Next playlist item
             this.play(nextIndex);
 
             break;
@@ -167,17 +187,11 @@
        */
       play: function(index) {
         var self = this,
-          item = null,
+          item = this.getItem(index),
           duration = null;
 
-        if ((index >= 0) && (index < this.items.length)) {
-          item = this.items[index];
+        if (item !== null) {
           duration = this.$.items.getDistributedNodes()[index].getAttribute("duration");
-
-          this.hide();
-
-          // Show the current playlist item.
-          item.element.style.display = "block";
 
           // Play the next item after the current one has completed.
           if (duration !== null) {
@@ -190,6 +204,7 @@
             }
           }
 
+          this.show(index);
           this.sendCommand(item, "play");
         }
       },
@@ -197,17 +212,16 @@
       /**
        * Play the next item in a playlist.
        */
-      playNext: function(currentIndex, command) {
-        var item, nextIndex,
-          itemsLength = this.items.length;
+      playNext: function(index, command) {
+        var item = this.getItem(index),
+          nextIndex = (index + 1 < this.items.length) ? (index + 1) : 0;
 
-        if ((currentIndex >= 0) && (currentIndex < itemsLength)) {
-          item = this.items[currentIndex];
-
+        if (item !== null) {
+          // Current playlist item
+          this.hide(index);
           this.sendCommand(item, command);
 
-          // Play the next playlist item.
-          nextIndex = (currentIndex + 1 < itemsLength) ? (currentIndex + 1): 0;
+          // Next playlist item
           this.play(nextIndex);
         }
       },
@@ -224,6 +238,19 @@
        */
       stop: function(index) {
         this.playNext(index, "stop");
+      },
+
+      /**
+       * Get a playlist item by index.
+       */
+      getItem: function(index) {
+        var itemsLength = this.items.length;
+
+        if ((index >= 0) && (index < itemsLength)) {
+          return this.items[index];
+        }
+
+        return null;
       },
 
       /**
@@ -253,11 +280,42 @@
       },
 
       /**
-       * Hide all playlist items.
+       * Hide playlist item.
        */
-      hide: function() {
-        for (var i = 0; i < this.items.length; i++) {
-          this.items[i].element.style.display = "none";
+      hide: function(index) {
+        var item = this.getItem(index);
+
+        if (item) {
+          if (this.intro) {
+            item.element.classList.remove(this.intro);
+          }
+
+          if (this.outro) {
+            item.element.classList.add(this.outro);
+          }
+          else {
+            item.element.style.display = "none";
+          }
+        }
+      },
+
+      /**
+       * Show playlist item.
+       */
+      show: function(index) {
+        var item = this.getItem(index);
+
+        if (item) {
+          if (this.intro) {
+            item.element.classList.add(this.intro);
+          }
+          else {
+            item.element.style.display = "block";
+          }
+
+          if (this.outro) {
+            item.element.classList.remove(this.outro);
+          }
         }
       },
 

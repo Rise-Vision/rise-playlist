@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>Playlist Items - Ready</title>
+  <title>Playlist</title>
 
-  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
-  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../../web-component-tester/browser.js"></script>
 
-  <link rel="import" href="../rise-playlist.html">
-  <link rel="import" href="../../web-component-rise-playlist-item/rise-playlist-item.html">
-  <link rel="import" href="rise-demo.html">
+  <link rel="import" href="../../rise-playlist.html">
+  <link rel="import" href="../../../web-component-rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="../rise-demo.html">
 </head>
 <body>
   <rise-playlist id="playlist">
@@ -29,7 +29,7 @@
   </rise-playlist>
 
   <script>
-    suite("playlist items ready", function() {
+    suite("playlist", function() {
       var clock = sinon.useFakeTimers(),
         playlist = document.querySelector("#playlist"),
         first = document.querySelector("#first"),
@@ -256,12 +256,79 @@
         });
       });
 
-      suite("hide", function() {
-        test("should hide all playlist items", function() {
-          playlist.hide();
+      suite("getItem", function() {
+        test("should return the correct item", function() {
+          var item = playlist.getItem(0);
 
-          assert.equal(playlist.items[0].element.style.display, "none", "first item");
-          assert.equal(playlist.items[1].element.style.display, "none", "second item");
+          assert.equal(item.id, "first");
+        });
+
+        test("should return null if the parameter is larger than the number of playlist items", function() {
+          var item = playlist.getItem(5);
+
+          assert.isNull(item);
+        });
+
+        test("should return null if the parameter is a negative value", function() {
+          var item = playlist.getItem(-1);
+
+          assert.isNull(item);
+        });
+      });
+
+      suite("hide", function() {
+        suite("no transitions", function() {
+          suiteSetup(function() {
+            playlist.hide(0);
+          });
+
+          test("should hide playlist item by setting its display property", function() {
+            assert.equal(first.style.display, "none");
+          });
+        });
+
+        suite("transitions", function() {
+          suiteSetup(function() {
+            playlist.setAttribute("intro", "fade-in");
+            playlist.setAttribute("outro", "fade-out");
+            playlist.hide(0);
+          });
+
+          test("should apply outro class to playlist item", function() {
+            assert.isTrue(first.classList.contains("fade-out"));
+          });
+
+          test("should remove intro class from playlist item", function() {
+            assert.isFalse(first.classList.contains("fade-in"));
+          });
+        });
+      });
+
+      suite("show", function() {
+        suite("show - transitions", function() {
+          suiteSetup(function() {
+            playlist.show(0);
+          });
+
+          test("should apply intro class to playlist item", function() {
+            assert.isTrue(first.classList.contains("fade-in"));
+          });
+
+          test("should remove outro class from playlist item", function() {
+            assert.isFalse(first.classList.contains("fade-out"));
+          });
+        });
+
+        suite("show - no transitions", function() {
+          suiteSetup(function() {
+            playlist.removeAttribute("intro");
+            playlist.removeAttribute("outro");
+            playlist.show(0);
+          });
+
+          test("should show playlist item by setting its display property", function() {
+            assert.equal(first.style.display, "block");
+          });
         });
       });
 
