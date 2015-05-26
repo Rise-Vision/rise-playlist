@@ -276,9 +276,37 @@
         });
       });
 
+      suite("hideAll", function() {
+        suite("no transitions", function() {
+          suiteSetup(function() {
+            playlist.hideAll();
+          });
+
+          test("should hide all playlist items by setting the display property", function() {
+            assert.equal(playlist.items[0].element.style.display, "none", "first item");
+            assert.equal(playlist.items[1].element.style.display, "none", "second item");
+          });
+        });
+
+        suite("transitions", function() {
+          suiteSetup(function() {
+            playlist.setAttribute("intro", "fade-in");
+            playlist.setAttribute("outro", "fade-out");
+            playlist.hideAll();
+          });
+
+          test("should apply outro class to all playlist items", function() {
+            assert.isTrue(first.classList.contains("fade-out"), "first item");
+            assert.isTrue(second.classList.contains("fade-out"), "second item");
+          });
+        });
+      });
+
       suite("hide", function() {
         suite("no transitions", function() {
           suiteSetup(function() {
+            playlist.removeAttribute("intro");
+            playlist.removeAttribute("outro");
             playlist.hide(0);
           });
 
