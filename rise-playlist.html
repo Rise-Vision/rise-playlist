@@ -104,6 +104,7 @@
       start: function() {
         if (this.items.length > 0) {
           this.sortItems();
+          this.hideAll();
           this.play(0);
           this.removeEventListener("rise-component-ready", this.handleReady, false);
         }
@@ -277,6 +278,15 @@
             }
           }
         });
+      },
+
+      /**
+       * Hide all playlist items.
+       */
+      hideAll: function() {
+        for (var i = 0; i < this.items.length; i++) {
+          this.hide(i);
+        }
       },
 
       /**

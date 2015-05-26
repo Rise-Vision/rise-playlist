@@ -9,11 +9,23 @@
   <link rel="import" href="demo-component.html">
 
   <style>
+    demo-component {
+      position: absolute;
+    }
 
+    .fade-in {
+      opacity: 1;
+      transition: opacity 1s;
+    }
+
+    .fade-out {
+      opacity: 0;
+      transition: opacity 1s;
+    }
   </style>
 </head>
 <body>
-  <rise-playlist>
+  <rise-playlist intro="fade-in" outro="fade-out">
 
     <rise-playlist-item duration="5">
        <demo-component id="apple" src="https://goo.gl/XBnh0j"></rise-demo>
