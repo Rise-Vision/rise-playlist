@@ -2,341 +2,317 @@
 
 <script src="../underscore/underscore.js"></script>
 
-<polymer-element name="rise-playlist" attributes="intro outro">
+<dom-module id="rise-playlist">
   <template>
     <content id="items" select="rise-playlist-item"></content>
   </template>
+</dom-module>
 
-  <script>
-    /* global Polymer, _ */
-    /*jshint newcap: false */
-    Polymer("rise-playlist", {
+<script>
+  /* global Polymer, _ */
+  /*jshint newcap: false */
+  Polymer({
+    is: "rise-playlist",
+
+    properties: {
       /**
        * The CSS class name for an intro transition.
-       *
-       * @attribute intro
-       * @type string
-       * @default ""
        */
-      intro: "",
+      intro: String,
 
       /**
        * The CSS class name for an outro transition.
-       *
-       * @attribute outro
-       * @type string
-       * @default ""
        */
-      outro: "",
+      outro: String
+    },
 
-      /**
-       * The playlist items that have reported as being ready.
-       *
-       * @property items
-       * @type object
-       * @default []
-       */
-      items: [],
+    /**
+     * The playlist items that have reported as being ready.
+     */
+    _items: [],
 
-      /**
-       * The total number of playlist items.
-       *
-       * @property totalItems
-       * @type number
-       * @default 0
-       */
-      totalItems: 0,
+    /**
+     * The total number of playlist items.
+     */
+    _totalItems: 0,
 
-      /**
-       * The number of playlist items that have reported as being ready.
-       *
-       * @property numItems
-       * @type number
-       * @default 0-
-       */
-      numItems: 0,
+    /**
+     * The number of playlist items that have reported as being ready.
+     */
+    _numItems: 0,
 
-      /**
-       * The ID of the timeout that fires if not all playlist items have reported ready after
-       * a specified delay.
-       *
-       * @property loadingTimeout
-       * @type number
-       * @default 0
-       */
-      loadingTimeout: 0,
+    /**
+     * The ID of the timeout that fires if not all playlist items have reported ready after
+     * a specified delay.
+     */
+    _loadingTimeout: 0,
 
-      /**
-       * The delay (in ms) for the timeout that fires if not all playlist items have reported ready.
-       *
-       * @property loadingDelay
-       * @type number
-       * @default 30000
-       */
-      loadingDelay: 30000,
+    /**
+     * The delay (in ms) for the timeout that fires if not all playlist items have reported ready.
+     */
+    _loadingDelay: 30000,
 
-      /************************************** INITIALIZATION **************************************/
+    /************************************** INITIALIZATION **************************************/
 
-      /**
-       * An instance of the element was inserted into the DOM.
-       */
-      attached: function() {
-        var self = this,
-          nodes = this.$.items.getDistributedNodes();
+    /**
+     * An instance of the element was inserted into the DOM.
+     */
+    attached: function() {
+      var self = this,
+        nodes = Polymer.dom(this.$.items).getDistributedNodes();
 
-        for (var i = 0; i < nodes.length; i++) {
-          if (nodes[i].nodeType === 1) {
-            this.totalItems++;
-          }
+      for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i].nodeType === 1) {
+          this._totalItems++;
+        }
+      }
+
+      this.addEventListener("rise-component-ready", this._handleReady, false);
+      this.addEventListener("rise-component-done", this._handleDone, false);
+
+      this._loadingTimeout = setTimeout(function() {
+        self._start();
+      }, this._loadingDelay);
+    },
+
+    /**
+     * Remove the event listener so that it won't be triggered by late-loading playlist items.
+     */
+    _start: function() {
+      if (this._items.length > 0) {
+        this._sortItems();
+        this._hideAll();
+        this.play(0);
+        this.removeEventListener("rise-component-ready", this._handleReady, false);
+      }
+    },
+
+    /***************************************** PLAYBACK *****************************************/
+
+    /**
+     * Add the playlist item to the items map if it does not already exist.
+     */
+    _handleReady: function(e) {
+      var item = {};
+
+      // Playlist item has already been added.
+      if (_.findWhere(this._items, { id: e.target.id }) !== undefined) {
+        return;
+      }
+
+      item.id = e.target.id;
+      item.element = e.target;
+
+      if (e.detail) {
+        if (e.detail.play) {
+          item.play = e.detail.play;
         }
 
-        this.addEventListener("rise-component-ready", this.handleReady, false);
-        this.addEventListener("rise-component-done", this.handleDone, false);
-
-        this.loadingTimeout = setTimeout(function() {
-          self.start();
-        }, this.loadingDelay);
-      },
-
-      /**
-       * Remove the event listener so that it won't be triggered by late-loading playlist items.
-       */
-      start: function() {
-        if (this.items.length > 0) {
-          this.sortItems();
-          this.hideAll();
-          this.play(0);
-          this.removeEventListener("rise-component-ready", this.handleReady, false);
-        }
-      },
-
-      /***************************************** PLAYBACK *****************************************/
-
-      /**
-       * Add the playlist item to the items map if it does not already exist.
-       */
-      handleReady: function(e) {
-        var item = {};
-
-        // Playlist item has already been added.
-        if (_.findWhere(this.items, { id: e.target.id }) !== undefined) {
-          return;
+        if (e.detail.pause) {
+          item.pause = e.detail.pause;
         }
 
-        item.id = e.target.id;
-        item.element = e.target;
-
-        if (e.detail) {
-          if (e.detail.play) {
-            item.play = e.detail.play;
-          }
-
-          if (e.detail.pause) {
-            item.pause = e.detail.pause;
-          }
-
-          if (e.detail.stop) {
-            item.stop = e.detail.stop;
-          }
-
-          if (e.detail.done) {
-            item.done = e.detail.done;
-          }
+        if (e.detail.stop) {
+          item.stop = e.detail.stop;
         }
 
-        this.items.push(item);
-        this.numItems++;
-
-        if (this.numItems === this.totalItems) {
-          this.start();
-          clearTimeout(this.loadingTimeout);
+        if (e.detail.done) {
+          item.done = e.detail.done;
         }
+      }
 
-        e.stopPropagation();
-      },
+      this._items.push(item);
+      this._numItems++;
 
-      /**
-       * Play the next item in the playlist.
-       */
-      handleDone: function(e) {
-        var nextIndex,
-          item = null,
-          itemsLength = this.items.length;
+      if (this._numItems === this._totalItems) {
+        this._start();
+        clearTimeout(this._loadingTimeout);
+      }
 
-        // Find current playlist item.
-        for (var index = 0; index < itemsLength; index++) {
-          if (this.items[index].id === e.target.id) {
-            item = this.items[index];
-            nextIndex = (index + 1 < itemsLength) ? (index + 1): 0;
+      e.stopPropagation();
+    },
 
-            // Current playlist item
-            this.hide(index);
-            this.sendCommand(item, "pause");
+    /**
+     * Play the next item in the playlist.
+     */
+    _handleDone: function(e) {
+      var nextIndex,
+        item = null,
+        itemsLength = this._items.length;
 
-            // Next playlist item
-            this.play(nextIndex);
+      // Find current playlist item.
+      for (var index = 0; index < itemsLength; index++) {
+        if (this._items[index].id === e.target.id) {
+          item = this._items[index];
+          nextIndex = (index + 1 < itemsLength) ? (index + 1): 0;
 
-            break;
-          }
-        }
-
-        e.stopPropagation();
-      },
-
-      /**
-       * Play a playlist item.
-       */
-      play: function(index) {
-        var self = this,
-          item = this.getItem(index),
-          duration = null;
-
-        if (item !== null) {
-          duration = this.$.items.getDistributedNodes()[index].getAttribute("duration");
-
-          // Play the next item after the current one has completed.
-          if (duration !== null) {
-            duration = parseInt(duration, 10);
-
-            if (!isNaN(duration)) {
-              setTimeout(function() {
-                self.playNext(index, "pause");
-              }, duration * 1000);
-            }
-          }
-
-          this.show(index);
-          this.sendCommand(item, "play");
-        }
-      },
-
-      /**
-       * Play the next item in a playlist.
-       */
-      playNext: function(index, command) {
-        var item = this.getItem(index),
-          nextIndex = (index + 1 < this.items.length) ? (index + 1) : 0;
-
-        if (item !== null) {
           // Current playlist item
-          this.hide(index);
-          this.sendCommand(item, command);
+          this._hide(index);
+          this._sendCommand(item, "pause");
 
           // Next playlist item
           this.play(nextIndex);
+
+          break;
         }
-      },
+      }
 
-      /**
-       * Pause a playlist item.
-       */
-      pause: function(index) {
-        this.playNext(index, "pause");
-      },
+      e.stopPropagation();
+    },
 
-      /**
-       * Stop a playlist item.
-       */
-      stop: function(index) {
-        this.playNext(index, "stop");
-      },
+    /**
+     * Play a playlist item.
+     */
+    play: function(index) {
+      var self = this,
+        item = this._getItem(index),
+        duration = null;
 
-      /**
-       * Get a playlist item by index.
-       */
-      getItem: function(index) {
-        var itemsLength = this.items.length;
+      if (item !== null) {
+        duration = Polymer.dom(this.$.items).getDistributedNodes()[index].getAttribute("duration");
 
-        if ((index >= 0) && (index < itemsLength)) {
-          return this.items[index];
+        // Play the next item after the current one has completed.
+        if (duration !== null) {
+          duration = parseInt(duration, 10);
+
+          if (!isNaN(duration)) {
+            setTimeout(function() {
+              self._playNext(index, "pause");
+            }, duration * 1000);
+          }
         }
 
-        return null;
-      },
+        this._show(index);
+        this._sendCommand(item, "play");
+      }
+    },
 
-      /**
-       * Sort playlist items.
-       */
-      sortItems: function() {
-        var items = this.$.items.getDistributedNodes(),
-          children = null;
+    /**
+     * Play the next item in a playlist.
+     */
+    _playNext: function(index, command) {
+      var item = this._getItem(index),
+        nextIndex = (index + 1 < this._items.length) ? (index + 1) : 0;
 
-        this.items = _.sortBy(this.items, function(item) {
-          // Iterate over playlist items.
-          for (var i = 0; i < items.length; i++) {
-            if ((items[i].nodeType === 1) && items[i].hasChildNodes()) {
-              children = items[i].childNodes;
+      if (item !== null) {
+        // Current playlist item
+        this._hide(index);
+        this._sendCommand(item, command);
 
-              // Iterate over children of current playlist item.
-              for (var j = 0; j < children.length; j++) {
-                if (children[j].nodeType === 1) {
-                  if (children[j].id === item.id) {
-                    return item.id;
-                  }
+        // Next playlist item
+        this.play(nextIndex);
+      }
+    },
+
+    /**
+     * Pause a playlist item.
+     */
+    pause: function(index) {
+      this._playNext(index, "pause");
+    },
+
+    /**
+     * Stop a playlist item.
+     */
+    stop: function(index) {
+      this._playNext(index, "stop");
+    },
+
+    /**
+     * Get a playlist item by index.
+     */
+    _getItem: function(index) {
+      var itemsLength = this._items.length;
+
+      if ((index >= 0) && (index < itemsLength)) {
+        return this._items[index];
+      }
+
+      return null;
+    },
+
+    /**
+     * Sort playlist items.
+     */
+    _sortItems: function() {
+      var items = Polymer.dom(this.$.items).getDistributedNodes(),
+        children = null;
+
+      this._items = _.sortBy(this._items, function(item) {
+        // Iterate over playlist items.
+        for (var i = 0; i < items.length; i++) {
+          if ((items[i].nodeType === 1) && items[i].hasChildNodes()) {
+            children = items[i].childNodes;
+
+            // Iterate over children of current playlist item.
+            for (var j = 0; j < children.length; j++) {
+              if (children[j].nodeType === 1) {
+                if (children[j].id === item.id) {
+                  return item.id;
                 }
               }
             }
           }
-        });
-      },
-
-      /**
-       * Hide all playlist items.
-       */
-      hideAll: function() {
-        for (var i = 0; i < this.items.length; i++) {
-          this.hide(i);
         }
-      },
+      });
+    },
 
-      /**
-       * Hide playlist item.
-       */
-      hide: function(index) {
-        var item = this.getItem(index);
+    /**
+     * Hide all playlist items.
+     */
+    _hideAll: function() {
+      for (var i = 0; i < this._items.length; i++) {
+        this._hide(i);
+      }
+    },
 
-        if (item) {
-          if (this.intro) {
-            item.element.classList.remove(this.intro);
-          }
+    /**
+     * Hide playlist item.
+     */
+    _hide: function(index) {
+      var item = this._getItem(index);
 
-          if (this.outro) {
-            item.element.classList.add(this.outro);
-          }
-          else {
-            item.element.style.display = "none";
-          }
+      if (item) {
+        if (this.intro) {
+          item.element.classList.remove(this.intro);
         }
-      },
 
-      /**
-       * Show playlist item.
-       */
-      show: function(index) {
-        var item = this.getItem(index);
-
-        if (item) {
-          if (this.intro) {
-            item.element.classList.add(this.intro);
-          }
-          else {
-            item.element.style.display = "block";
-          }
-
-          if (this.outro) {
-            item.element.classList.remove(this.outro);
-          }
+        if (this.outro) {
+          item.element.classList.add(this.outro);
         }
-      },
-
-      /**
-       * Send a command to a playlist item.
-       */
-      sendCommand: function(item, command) {
-        if (item.hasOwnProperty(command)) {
-          item[command].call(item.element);
+        else {
+          item.element.style.display = "none";
         }
       }
-    });
-  </script>
-</polymer-element>
+    },
+
+    /**
+     * Show playlist item.
+     */
+    _show: function(index) {
+      var item = this._getItem(index);
+
+      if (item) {
+        if (this.intro) {
+          item.element.classList.add(this.intro);
+        }
+        else {
+          item.element.style.display = "block";
+        }
+
+        if (this.outro) {
+          item.element.classList.remove(this.outro);
+        }
+      }
+    },
+
+    /**
+     * Send a command to a playlist item.
+     */
+    _sendCommand: function(item, command) {
+      if (item.hasOwnProperty(command)) {
+        item[command].call(item.element);
+      }
+    }
+  });
+</script>

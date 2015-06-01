@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <title>Playlist - Item Visibility</title>
 
-  <script src="../../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
   <script src="../../../web-component-tester/browser.js"></script>
 
+  <script>
+    var clock = sinon.useFakeTimers();
+  </script>
+
   <link rel="import" href="../../rise-playlist.html">
-  <link rel="import" href="../../../web-component-rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="../../../rise-playlist-item/rise-playlist-item.html">
   <link rel="import" href="../rise-demo.html">
 </head>
 <body>
@@ -29,8 +33,7 @@
 
   <script>
     suite("playlist item visibility", function() {
-      var clock = sinon.useFakeTimers(),
-        playlist = document.querySelector("#playlist"),
+      var playlist = document.querySelector("#playlist"),
         first = document.querySelector("#first"),
         second = document.querySelector("#second");
 

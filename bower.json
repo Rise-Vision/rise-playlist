@@ -18,11 +18,11 @@
     "test"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.5.5"
+    "polymer": "#^1.0.0"
   },
   "devDependencies": {
-    "rise-playlist-item": "https://github.com/Rise-Vision/web-component-rise-playlist-item.git#1.0.0",
+    "rise-playlist-item": "https://github.com/Rise-Vision/web-component-rise-playlist-item.git#1.0.2",
     "underscore": "~1.8.2",
-    "web-component-tester": "~2.2.6"
+    "web-component-tester": "~3.1.3"
   }
 }
