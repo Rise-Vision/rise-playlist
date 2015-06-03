@@ -19,12 +19,20 @@
 <body>
   <rise-playlist id="playlist">
 
-    <rise-playlist-item>
+    <rise-playlist-item duration="10">
       <rise-demo id="first"></rise-demo>
     </rise-playlist-item>
 
-    <rise-playlist-item>
+    <rise-playlist-item duration="10">
       <rise-demo id="second"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="10">
+      <rise-demo id="third"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="10">
+      <rise-demo id="fourth"></rise-demo>
     </rise-playlist-item>
 
   </rise-playlist>
@@ -32,33 +40,37 @@
   <script>
     suite("playlist items not ready", function() {
       var playlist = document.querySelector("#playlist"),
-        first = document.querySelector("#first"),
+        second = document.querySelector("#second"),
+        fourth = document.querySelector("#fourth"),
         readySpy = null,
         playSpy = null;
 
       suiteSetup(function() {
-        first.onReady();
+        second.onReady();
+        fourth.onReady();
 
         readySpy = sinon.spy(playlist, "_handleReady");
         playSpy = sinon.spy(playlist._items[0], "play");
 
-        clock.tick(35000);
+        clock.tick(30000);
       });
 
       suiteTeardown(function() {
         clock.restore();
+
         playlist._items[0].play.restore();
       });
 
-      test("should have a single item in the items array", function() {
-        assert.equal(playlist._items.length, 1);
+      test("should have correct number of items in the _items array", function() {
+        assert.equal(playlist._items.length, 2);
       });
 
-      test("should sort the items array in the same order as the playlist items appear in the playlist", function() {
-        assert.equal(playlist._items[0].id, "first");
+       test("should sort the _items array in the same order as the items appear in the playlist", function() {
+        assert.equal(playlist._items[0].id, "second");
+        assert.equal(playlist._items[1].id, "fourth");
       });
 
-      test("should play first playlist item after the loading timer has expired", function() {
+      test("should play the second item after the loading timer has expired", function() {
         assert(playSpy.calledOnce);
       });
 
