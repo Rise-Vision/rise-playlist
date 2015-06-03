@@ -42,12 +42,6 @@
     _numItems: 0,
 
     /**
-     * The ID of the timeout that fires if not all playlist items have reported ready after
-     * a specified delay.
-     */
-    _loadingTimeout: 0,
-
-    /**
      * The delay (in ms) for the timeout that fires if not all playlist items have reported ready.
      */
     _loadingDelay: 30000,
@@ -58,8 +52,7 @@
      * An instance of the element was inserted into the DOM.
      */
     attached: function() {
-      var self = this,
-        nodes = Polymer.dom(this.$.items).getDistributedNodes();
+      var nodes = Polymer.dom(this.$.items).getDistributedNodes();
 
       for (var i = 0; i < nodes.length; i++) {
         if (nodes[i].nodeType === 1) {
@@ -70,8 +63,8 @@
       this.addEventListener("rise-component-ready", this._handleReady, false);
       this.addEventListener("rise-component-done", this._handleDone, false);
 
-      this._loadingTimeout = setTimeout(function() {
-        self._start();
+      this.debounce("start", function() {
+        this._start();
       }, this._loadingDelay);
     },
 
@@ -126,7 +119,7 @@
 
       if (this._numItems === this._totalItems) {
         this._start();
-        clearTimeout(this._loadingTimeout);
+        this.cancelDebouncer("start");
       }
 
       e.stopPropagation();
@@ -164,8 +157,7 @@
      * Play a playlist item.
      */
     play: function(index) {
-      var self = this,
-        item = this._getItem(index),
+      var item = this._getItem(index),
         duration = null;
 
       if (item !== null) {
@@ -176,8 +168,8 @@
           duration = parseInt(duration, 10);
 
           if (!isNaN(duration)) {
-            setTimeout(function() {
-              self._playNext(index, "pause");
+            this.debounce("play-next", function() {
+              this._playNext(index, "pause");
             }, duration * 1000);
           }
         }
@@ -236,25 +228,36 @@
      */
     _sortItems: function() {
       var items = Polymer.dom(this.$.items).getDistributedNodes(),
-        children = null;
+        componentId = "",
+        children = null,
+        newItems = [];
 
-      this._items = _.sortBy(this._items, function(item) {
-        // Iterate over playlist items.
-        for (var i = 0; i < items.length; i++) {
-          if ((items[i].nodeType === 1) && items[i].hasChildNodes()) {
-            children = items[i].childNodes;
+      // Iterate over playlist items.
+      for (var i = 0; i < items.length; i++) {
+        if ((items[i].nodeType === 1) && items[i].hasChildNodes()) {
+          children = items[i].childNodes;
 
-            // Iterate over children of current playlist item.
-            for (var j = 0; j < children.length; j++) {
-              if (children[j].nodeType === 1) {
-                if (children[j].id === item.id) {
-                  return item.id;
+          // Iterate over children of current playlist item.
+          for (var j = 0; j < children.length; j++) {
+            if (children[j].nodeType === 1) {
+              componentId = children[j].id;
+
+              //  Find the matching element in _items array, if applicable.
+              for (var k = 0; k < this._items.length; k++) {
+                if (componentId === this._items[k].id) {
+                  newItems.push(this._items[k]);
+
+                  break;
                 }
               }
+
+              break;
             }
           }
         }
-      });
+      }
+
+      this._items = newItems;
     },
 
     /**
