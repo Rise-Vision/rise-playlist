@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <title>Playlist - Duration</title>
 
-  <script src="../../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
   <script src="../../../web-component-tester/browser.js"></script>
 
+  <script>
+    var clock = sinon.useFakeTimers();
+  </script>
+
   <link rel="import" href="../../rise-playlist.html">
-  <link rel="import" href="../../../web-component-rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="../../../rise-playlist-item/rise-playlist-item.html">
   <link rel="import" href="../rise-demo.html">
 </head>
 <body>
@@ -33,8 +37,7 @@
 
   <script>
     suite("duration", function() {
-      var clock = sinon.useFakeTimers(),
-        playlist = document.querySelector("#playlist"),
+      var playlist = document.querySelector("#playlist"),
         first = document.querySelector("#first"),
         second = document.querySelector("#second"),
         third = document.querySelector("#third"),
@@ -44,21 +47,21 @@
 
       suiteSetup(function() {
         first.onReady();
-        firstSpy = sinon.spy(playlist.items[0], "play");
+        firstSpy = sinon.spy(playlist._items[0], "play");
 
         second.onReady();
-        secondSpy = sinon.spy(playlist.items[1], "play");
+        secondSpy = sinon.spy(playlist._items[1], "play");
 
         third.onReady();
-        thirdSpy = sinon.spy(playlist.items[2], "play");
+        thirdSpy = sinon.spy(playlist._items[2], "play");
       });
 
       suiteTeardown(function() {
         clock.restore();
 
-        playlist.items[0].play.restore();
-        playlist.items[1].play.restore();
-        playlist.items[2].play.restore();
+        playlist._items[0].play.restore();
+        playlist._items[1].play.restore();
+        playlist._items[2].play.restore();
       });
 
       test("should play first item for 10 seconds followed by second item", function() {

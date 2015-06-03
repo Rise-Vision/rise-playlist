@@ -1,48 +1,54 @@
 <link rel="import" href="../../polymer/polymer.html">
 
-<polymer-element name="rise-demo" attributes="src">
+<dom-module id="rise-demo">
   <template>
     <img src="{{src}}">
   </template>
+</dom-module>
 
-  <script>
-    /* global Polymer */
-    /*jshint newcap: false */
-    Polymer("rise-demo", {
-      // Dispatch rise-component-ready to indicate that the component has initialized.
-      onReady: function() {
-        var readyEvent = new CustomEvent("rise-component-ready", {
-          "detail": {
-            "play": this.play,
-            "pause": this.pause,
-            "stop": this.stop,
-            "done": true
-          },
-          "bubbles": true
-        });
+<script>
+  /* global Polymer */
+  /*jshint newcap: false */
+  Polymer({
+    is: "rise-demo",
 
-        this.dispatchEvent(readyEvent);
-      },
+    properties: {
+      src: String
+    },
 
-      play: function() {
-        // Replace this code with custom functionality to play the component.
-        this.dispatchEvent(new CustomEvent("rise-demo-play", { "bubbles": true }));
-      },
+    // Dispatch rise-component-ready to indicate that the component has initialized.
+    onReady: function() {
+      var readyEvent = new CustomEvent("rise-component-ready", {
+        "detail": {
+          "play": this.play,
+          "pause": this.pause,
+          "stop": this.stop,
+          "done": true
+        },
+        "bubbles": true
+      });
 
-      pause: function() {
-        // Replace this code with custom functionality to pause the component.
-        this.dispatchEvent(new CustomEvent("rise-demo-pause", { "bubbles": true }));
-      },
+      this.dispatchEvent(readyEvent);
+    },
 
-      stop: function() {
-        // Replace this code with custom functionality to stop the component.
-        this.dispatchEvent(new CustomEvent("rise-demo-stop", { "bubbles": true }));
-      },
+    play: function() {
+      // Replace this code with custom functionality to play the component.
+      this.dispatchEvent(new CustomEvent("rise-demo-play", { "bubbles": true }));
+    },
 
-      done: function() {
-        // Dispatch rise-component-done to indicate that the component has completed playback.
-        this.dispatchEvent(new CustomEvent("rise-component-done", { "bubbles": true }));
-      }
-    });
-  </script>
-</polymer-element>
+    pause: function() {
+      // Replace this code with custom functionality to pause the component.
+      this.dispatchEvent(new CustomEvent("rise-demo-pause", { "bubbles": true }));
+    },
+
+    stop: function() {
+      // Replace this code with custom functionality to stop the component.
+      this.dispatchEvent(new CustomEvent("rise-demo-stop", { "bubbles": true }));
+    },
+
+    done: function() {
+      // Dispatch rise-component-done to indicate that the component has completed playback.
+      this.dispatchEvent(new CustomEvent("rise-component-done", { "bubbles": true }));
+    }
+  });
+</script>

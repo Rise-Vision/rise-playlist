@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <title>Playlist - Not Ready</title>
 
-  <script src="../../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
   <script src="../../../web-component-tester/browser.js"></script>
 
+  <script>
+    var clock = sinon.useFakeTimers();
+  </script>
+
   <link rel="import" href="../../rise-playlist.html">
-  <link rel="import" href="../../../web-component-rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="../../../rise-playlist-item/rise-playlist-item.html">
   <link rel="import" href="../rise-demo.html">
 </head>
 <body>
@@ -27,8 +31,7 @@
 
   <script>
     suite("playlist items not ready", function() {
-      var clock = sinon.useFakeTimers(),
-        playlist = document.querySelector("#playlist"),
+      var playlist = document.querySelector("#playlist"),
         first = document.querySelector("#first"),
         readySpy = null,
         playSpy = null;
@@ -36,23 +39,23 @@
       suiteSetup(function() {
         first.onReady();
 
-        readySpy = sinon.spy(playlist, "handleReady");
-        playSpy = sinon.spy(playlist.items[0], "play");
+        readySpy = sinon.spy(playlist, "_handleReady");
+        playSpy = sinon.spy(playlist._items[0], "play");
 
-        clock.tick(30000);
+        clock.tick(35000);
       });
 
       suiteTeardown(function() {
         clock.restore();
-        playlist.items[0].play.restore();
+        playlist._items[0].play.restore();
       });
 
       test("should have a single item in the items array", function() {
-        assert.equal(playlist.items.length, 1);
+        assert.equal(playlist._items.length, 1);
       });
 
       test("should sort the items array in the same order as the playlist items appear in the playlist", function() {
-        assert.equal(playlist.items[0].id, "first");
+        assert.equal(playlist._items[0].id, "first");
       });
 
       test("should play first playlist item after the loading timer has expired", function() {
