@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Playlist - Content Sync</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../../web-component-tester/browser.js"></script>
+
+  <script>
+    var clock = sinon.useFakeTimers();
+  </script>
+
+  <link rel="import" href="../../rise-playlist.html">
+  <link rel="import" href="../../../rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="../rise-demo.html">
+</head>
+<body>
+  <rise-playlist id="playlist">
+
+    <rise-playlist-item duration="10">
+      <rise-demo id="item-1"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="10">
+      <rise-demo id="item-2"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item>
+      <rise-demo id="item-3"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="5">
+      <rise-demo id="item-4"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="invalid">
+      <rise-demo id="item-5"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="15">
+      <rise-demo id="item-6"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="60">
+      <rise-demo id="item-7"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item>
+      <rise-demo id="item-8"></rise-demo>
+    </rise-playlist-item>
+
+    <rise-playlist-item duration="invalid">
+      <rise-demo id="item-9"></rise-demo>
+    </rise-playlist-item>
+
+  </rise-playlist>
+
+  <script>
+    suite("content sync", function() {
+      var playlist = document.querySelector("#playlist");
+
+      suiteSetup(function() {
+        document.querySelector("#item-2").onReady();
+        document.querySelector("#item-4").onReady();
+        document.querySelector("#item-6").onReady();
+        document.querySelector("#item-7").onReady();
+        document.querySelector("#item-8").onReady();
+        document.querySelector("#item-9").onReady();
+
+        clock.tick(30000);
+      });
+
+      suiteTeardown(function() {
+        clock.restore();
+      });
+
+      suite("_calculateDuration", function() {
+        test("should correctly set the duration property for an item when the item before it has a " +
+          "duration and is not ready", function() {
+          assert.equal(playlist._items[0].duration, 20000);
+        });
+
+        test("should correctly set the duration property for an item when the item before it has no " +
+          "duration and is not ready", function() {
+          assert.equal(playlist._items[1].duration, 5000);
+        });
+
+        test("should correctly set the duration property for an item when the item before it has an " +
+          "invalid duration and is not ready", function() {
+          assert.equal(playlist._items[2].duration, 15000);
+        });
+
+        test("should correctly set the duration property for an item when it has a valid duration", function() {
+          assert.equal(playlist._items[3].duration, 60000);
+        });
+
+        test("should correctly set the duration property for an item when it doesn't have a duration", function() {
+          assert.equal(playlist._items[4].duration, 0);
+        });
+
+        test("should correctly set the duration property for an item when it has an invalid duration", function() {
+          assert.equal(playlist._items[5].duration, 0);
+        });
+      });
+
+      suite("_getDuration", function() {
+        test("should return correct duration for an item", function() {
+          assert.equal(playlist._getDuration(0), 20000);
+        });
+
+        test("should return 0 if an item has no duration property", function() {
+          delete playlist._items[0].duration;
+
+          assert.equal(playlist._getDuration(0), 0);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

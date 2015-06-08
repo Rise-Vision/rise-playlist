@@ -30,8 +30,7 @@
 
   <script>
     suite("playlist", function() {
-      var clock = sinon.useFakeTimers(),
-        playlist = document.querySelector("#playlist"),
+      var playlist = document.querySelector("#playlist"),
         first = document.querySelector("#first"),
         second = document.querySelector("#second"),
         spy = null,
@@ -39,17 +38,13 @@
         pauseSpy = null,
         stopSpy = null;
 
-      suiteTeardown(function() {
-        clock.restore();
-      });
-
       suite("attached", function() {
         test("should set the total number of playlist items", function() {
           assert.equal(playlist._totalItems, 2);
         });
       });
 
-      suite("handleReady", function() {
+      suite("_handleReady", function() {
         suiteTeardown(function() {
           playlist._handleReady.restore();
         });
@@ -96,7 +91,6 @@
 
         test("should sort the items array in the same order as the playlist items appear in the playlist", function() {
           first.onReady();
-          clock.tick(30000);
 
           assert.equal(playlist._items[0].id, "first", "first playlist item");
           assert.equal(playlist._items[1].id, "second", "second playlist item");
@@ -110,7 +104,7 @@
         });
       });
 
-      suite("handleDone", function() {
+      suite("_handleDone", function() {
         suiteSetup(function() {
           pauseSpy = sinon.spy(playlist._items[0], "pause");
           playSpy = sinon.spy(playlist._items[1], "play");
@@ -172,7 +166,7 @@
         });
       });
 
-      suite("playNext", function() {
+      suite("_playNext", function() {
         suiteSetup(function() {
           pauseSpy = sinon.spy(playlist._items[0], "pause");
           playSpy = sinon.spy(playlist._items[1], "play");
@@ -252,7 +246,7 @@
         });
       });
 
-      suite("getItem", function() {
+      suite("_getItem", function() {
         test("should return the correct item", function() {
           var item = playlist._getItem(0);
 
@@ -272,7 +266,7 @@
         });
       });
 
-      suite("hideAll", function() {
+      suite("_hideAll", function() {
         suite("no transitions", function() {
           suiteSetup(function() {
             playlist._hideAll();
@@ -298,7 +292,7 @@
         });
       });
 
-      suite("hide", function() {
+      suite("_hide", function() {
         suite("no transitions", function() {
           suiteSetup(function() {
             playlist.removeAttribute("intro");
@@ -328,7 +322,7 @@
         });
       });
 
-      suite("show", function() {
+      suite("_show", function() {
         suite("show - transitions", function() {
           suiteSetup(function() {
             playlist._show(0);
@@ -356,7 +350,7 @@
         });
       });
 
-      suite("sendCommand", function() {
+      suite("_sendCommand", function() {
         suiteSetup(function() {
           playSpy = sinon.spy(playlist._items[0], "play");
           pauseSpy = sinon.spy(playlist._items[0], "pause");

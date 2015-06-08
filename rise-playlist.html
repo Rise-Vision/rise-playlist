@@ -74,6 +74,7 @@
     _start: function() {
       if (this._items.length > 0) {
         this._sortItems();
+        this._calculateDuration();
         this._hideAll();
         this.play(0);
         this.removeEventListener("rise-component-ready", this._handleReady, false);
@@ -158,20 +159,16 @@
      */
     play: function(index) {
       var item = this._getItem(index),
-        duration = null;
+        duration;
 
       if (item !== null) {
-        duration = Polymer.dom(this.$.items).getDistributedNodes()[index].getAttribute("duration");
+        duration = this._getDuration(index);
 
         // Play the next item after the current one has completed.
-        if (duration !== null) {
-          duration = parseInt(duration, 10);
-
-          if (!isNaN(duration)) {
-            this.debounce("play-next", function() {
-              this._playNext(index, "pause");
-            }, duration * 1000);
-          }
+        if (duration !== 0) {
+          this.debounce("play-next", function() {
+            this._playNext(index, "pause");
+          }, duration);
         }
 
         this._show(index);
@@ -224,6 +221,20 @@
     },
 
     /**
+     * Get the duration of a particular playlist item.
+     */
+    _getDuration: function(index) {
+      var item = this._items[index];
+
+      if (item.hasOwnProperty("duration")) {
+        return item.duration;
+      }
+      else {
+        return 0;
+      }
+    },
+
+    /**
      * Sort playlist items.
      */
     _sortItems: function() {
@@ -242,7 +253,7 @@
             if (children[j].nodeType === 1) {
               componentId = children[j].id;
 
-              //  Find the matching element in _items array, if applicable.
+              // Find the matching element in _items array, if applicable.
               for (var k = 0; k < this._items.length; k++) {
                 if (componentId === this._items[k].id) {
                   newItems.push(this._items[k]);
@@ -258,6 +269,58 @@
       }
 
       this._items = newItems;
+    },
+
+    /**
+     * Calculate the duration of all playlist items.
+     */
+    _calculateDuration: function() {
+      var items = Polymer.dom(this.$.items).getDistributedNodes(),
+        contentId = "",
+        children = null,
+        duration = 0,
+        totalDuration = 0;
+
+      // Iterate over the playlist item nodes.
+      for (var i = 0; i < items.length; i++) {
+        // Found the rise-playlist-item node.
+        if ((items[i].nodeType === 1) && items[i].hasChildNodes()) {
+          children = items[i].childNodes;
+
+          if (items[i].hasAttribute("duration")) {
+            duration = parseInt(items[i].getAttribute("duration"), 10);
+
+            if (isNaN(duration)) {
+              duration = 0;
+            }
+          }
+          else {
+            duration = 0;
+          }
+
+          totalDuration += duration;
+
+          // Iterate over children of current rise-playlist-item node.
+          for (var j = 0; j < children.length; j++) {
+            // Found the content node.
+            if (children[j].nodeType === 1) {
+              contentId = children[j].id;
+
+              // Find the matching element in the _items array, if applicable.
+              for (var k = 0; k < this._items.length; k++) {
+                if (contentId === this._items[k].id) {
+                  this._items[k].duration = totalDuration * 1000;
+                  totalDuration = 0;
+
+                  break;
+                }
+              }
+
+              break;
+            }
+          }
+        }
+      }
     },
 
     /**

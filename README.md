@@ -68,6 +68,8 @@ var readyEvent = new CustomEvent("rise-component-ready", {
 this.dispatchEvent(readyEvent);
 ```
 
+The component has 30 seconds in which to initialize and dispatch the `rise-component-ready` event. After that, only components that have reported as ready will display. Components that are skipped will have their playlist item duration (if specified) added to the duration of the subsequent playlist item.
+
 If a component supports play until done, it must dispatch the `rise-component-done` event once a full playback cycle has completed. This event takes no parameters. For example, the following code will dispatch this event:
 ```
 this.dispatchEvent(new CustomEvent("rise-component-done", { "bubbles": true }));
