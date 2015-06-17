@@ -23,20 +23,8 @@
       <rise-demo id="item-1"></rise-demo>
     </rise-playlist-item>
 
-    <rise-playlist-item duration="10">
-      <rise-demo id="item-2"></rise-demo>
-    </rise-playlist-item>
-
     <rise-playlist-item duration="5">
-      <rise-demo id="item-3"></rise-demo>
-    </rise-playlist-item>
-
-    <rise-playlist-item duration="5">
-      <rise-demo id="item-4"></rise-demo>
-    </rise-playlist-item>
-
-    <rise-playlist-item duration="60">
-      <rise-demo id="item-5">
+      <rise-demo id="item-2">
         <nested-element></nested-element>
       </rise-demo>
     </rise-playlist-item>
@@ -46,96 +34,70 @@
   <script>
     suite("content sync", function() {
       var playlist = document.querySelector("#playlist"),
+        item1 = document.querySelector("#item-1"),
+        item2 = document.querySelector("#item-2"),
         readySpy = null,
-        item2PlaySpy = null,
-        item4PlaySpy = null,
-        item5PlaySpy = null,
-        item2PauseSpy = null,
-        item4PauseSpy = null,
-        item5PauseSpy = null;
+        playSpy = null,
+        pauseSpy = null;
 
       suiteSetup(function() {
         document.querySelector("#item-2").onReady();
-        document.querySelector("#item-4").onReady();
-        document.querySelector("#item-5").onReady();
 
         readySpy = sinon.spy(playlist, "_handleReady");
-        item2PlaySpy = sinon.spy(playlist._items[0], "play");
-        item4PlaySpy = sinon.spy(playlist._items[1], "play");
-        item5PlaySpy = sinon.spy(playlist._items[2], "play");
-        item2PauseSpy = sinon.spy(playlist._items[0], "pause");
-        item4PauseSpy = sinon.spy(playlist._items[1], "pause");
-        item5PauseSpy = sinon.spy(playlist._items[2], "pause");
+        playSpy = sinon.spy(playlist._items[1], "play");
+        pauseSpy = sinon.spy(playlist._items[1], "pause");
 
-        clock.tick(30000);
+        clock.tick(5000);
       });
 
       suiteTeardown(function() {
         clock.restore();
 
         playlist._handleReady.restore();
-        playlist._items[0].play.restore();
         playlist._items[1].play.restore();
-        playlist._items[2].play.restore();
-        playlist._items[0].pause.restore();
         playlist._items[1].pause.restore();
-        playlist._items[2].pause.restore();
       });
 
       test("should have correct number of items in the _items array", function() {
-        assert.equal(playlist._items.length, 3);
+        assert.equal(playlist._items.length, 2);
       });
 
-       test("should sort the _items array in the same order as the items appear in the playlist", function() {
-        assert.equal(playlist._items[0].id, "item-2", "item-2");
-        assert.equal(playlist._items[1].id, "item-4", "item-4");
-        assert.equal(playlist._items[2].id, "item-5", "item-5");
+      test("should hide all items", function() {
+        assert(item1.style.display === "none", "item-1 is hidden");
+        assert(item2.style.display === "none", "item-2 is hidden");
       });
 
-      test("should not call ready event handler after the loading timer has expired", function() {
-        assert(readySpy.notCalled);
-      });
-
-      test("should start playing item-2 after the loading timer has expired", function() {
-        assert(item2PlaySpy.calledOnce);
-      });
-
-      test("should play item-2 for the combined duration of item-1 and item-2", function() {
-        clock.tick(19999);
-
-        assert(item2PauseSpy.notCalled, "item-2 is still playing");
-
-        clock.tick(1);
-
-        assert(item2PauseSpy.calledOnce, "item-2 is paused");
-      });
-
-      test("should play item-4 for the combined duration of item-3 and item-4", function() {
-        assert(item4PlaySpy.calledOnce, "item-4 is playing");
+      test("should hide item-1 for its entire duration", function() {
+        assert(item1.style.display === "none", "item-1 is hidden");
 
         clock.tick(9999);
 
-        assert(item4PauseSpy.notCalled, "item-4 is still playing");
+        assert(item1.style.display === "none", "item-1 is still hidden");
+      });
+
+      test("should play and show item-2", function() {
+        assert(item2.style.display === "none", "item-2 is hidden");
+        assert(playSpy.notCalled, "item-2 is not playing");
 
         clock.tick(1);
 
-        assert(item4PauseSpy.calledOnce, "item-4 is paused");
+        assert(item2.style.display === "block", "item-2 is visible");
+        assert(playSpy.calledOnce, "item-2 is playing");
       });
 
-      test("should play item-5 for its specified duration", function() {
-        assert(item5PlaySpy.calledOnce, "item-5 is playing");
+      test("should pause and hide item-2", function() {
+        clock.tick(5000);
 
-        clock.tick(59999);
-
-        assert(item5PauseSpy.notCalled, "item-5 is still playing");
-
-        clock.tick(1);
-
-        assert(item5PauseSpy.calledOnce, "item-5 is paused");
+        assert(item2.style.display === "none", "item-2 is hidden");
+        assert(pauseSpy.calledOnce, "item-2 is paused");
       });
 
-      test("should start playing item-2 after the last item has finished", function() {
-        assert(item2PlaySpy.calledTwice);
+      test("should hide item-1 for its entire duration after the last playlist item has finished", function() {
+        assert(item1.style.display === "none", "item-1 is hidden");
+
+        clock.tick(9999);
+
+        assert(item1.style.display === "none", "item-1 is still hidden");
       });
     });
   </script>
