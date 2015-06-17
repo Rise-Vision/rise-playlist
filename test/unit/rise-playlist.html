@@ -45,22 +45,13 @@
       });
 
       suite("_handleReady", function() {
-        suiteTeardown(function() {
-          playlist._handleReady.restore();
-        });
-
-        test("should add an item to the items property", function() {
+        suiteSetup(function() {
+          first.onReady();
           second.onReady();
-
-          assert.equal(playlist._items.length, 1);
         });
 
-        test("should store the id", function() {
-          assert.equal(playlist._items[0].id, "second");
-        });
-
-        test("should store the element", function() {
-          assert.isObject(playlist._items[0].element);
+        test("should correctly set isReady property", function() {
+          assert.equal(playlist._items[0].isReady, true);
         });
 
         test("should store the play function", function() {
@@ -79,28 +70,14 @@
           assert.isBoolean(playlist._items[0].done);
         });
 
-        test("should increment numItems", function() {
-          assert.equal(playlist._numItems, 1);
+        test("should increment _numItems", function() {
+          assert.equal(playlist._numItems, 2);
         });
 
-        test("should not add an item to the items property if it already exists", function() {
+        test("should not increment _numItems if an item fires the ready event more than once", function() {
           second.onReady();
 
-          assert.equal(playlist._items.length, 1);
-        });
-
-        test("should sort the items array in the same order as the playlist items appear in the playlist", function() {
-          first.onReady();
-
-          assert.equal(playlist._items[0].id, "first", "first playlist item");
-          assert.equal(playlist._items[1].id, "second", "second playlist item");
-        });
-
-        test("should not call ready event handler again once all playlist items are ready", function() {
-          spy = sinon.spy(playlist, "_handleReady");
-          first.onReady();
-
-          assert(spy.notCalled);
+          assert.equal(playlist._numItems, 2);
         });
       });
 
