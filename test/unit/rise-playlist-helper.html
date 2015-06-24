@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>Playlist - Content Sync</title>
+  <title>Playlist - Helper</title>
 
   <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
   <script src="../../../web-component-tester/browser.js"></script>
@@ -92,6 +92,16 @@
         });
       });
 
+      suite("_getItem", function() {
+        test("should return the correct playlist item for a valid index", function() {
+          assert.deepEqual(playlist._getItem(0), playlist._items[0]);
+        });
+
+        test("should return null for an invalid index", function() {
+          assert.isNull(playlist._getItem(2));
+        });
+      });
+
       suite("_getDuration", function() {
         test("should return correct duration of a playlist item", function() {
           assert.equal(playlist._getDuration(singleItem), 10000);
@@ -105,6 +115,19 @@
           assert.equal(playlist._getDuration(multipleItems), 0);
         });
       });
+
+      suite("_getNextIndex", function() {
+        test("should return the index of the next item", function() {
+          assert.equal(playlist._getNextIndex(0), 1);
+        });
+
+        test("should return the index of the first item when the current index references the " +
+          "last item of a playlist", function() {
+          assert.equal(playlist._getNextIndex(1), 0);
+        });
+      });
+
+      // TODO: Move _hideAll, _hide, _show and _sendCommand tests into this file.
     });
   </script>
 </body>

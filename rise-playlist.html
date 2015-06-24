@@ -54,6 +54,8 @@
     attached: function() {
       var nodes = Polymer.dom(this.$.items).getDistributedNodes();
 
+      this._items = [];
+
       for (var i = 0; i < nodes.length; i++) {
         if (nodes[i].nodeType === 1) {
           this._addItem(nodes[i]);
@@ -70,7 +72,16 @@
       }, this._loadingDelay);
     },
 
-    /*************************************** EVENT HANDLERS ***************************************/
+    _dispatchReady: function() {
+      var readyEvent = new CustomEvent("rise-playlist-ready", {
+        "detail": {
+          "items": this._items
+        },
+        "bubbles": true
+      });
+
+      this.dispatchEvent(readyEvent);
+    },
 
     /**
      * Add more details about a particular content element once it's ready.
@@ -113,34 +124,6 @@
       e.stopPropagation();
     },
 
-    /**
-     * Play the next item in the playlist.
-     */
-    _handleDone: function(e) {
-      var nextIndex,
-        item = null,
-        itemsLength = this._items.length;
-
-      // Find current playlist item.
-      for (var index = 0; index < itemsLength; index++) {
-        if (this._items[index].id === e.target.id) {
-          item = this._items[index];
-          nextIndex = (index + 1 < itemsLength) ? (index + 1): 0;
-
-          // Current playlist item
-          this._hide(index);
-          this._sendCommand(item, "pause");
-
-          // Next playlist item
-          this.play(nextIndex);
-
-          break;
-        }
-      }
-
-      e.stopPropagation();
-    },
-
     /****************************************** PLAYBACK ******************************************/
 
     /**
@@ -148,7 +131,7 @@
      */
     _start: function() {
       if (this._items.length > 0) {
-        this.play(0);
+        this._dispatchReady();
       }
     },
 
@@ -156,40 +139,49 @@
      * Play a playlist item.
      */
     play: function(index) {
-      var item = this._getItem(index),
-        duration;
+      var item = this._getItem(index);
 
-      if (item !== null) {
-        duration = item.duration;
-
-        // Play the next item after the current one has completed.
-        if (duration !== 0) {
-          this.debounce("play-next", function() {
-            this._playNext(index, "pause");
-          }, duration);
-        }
-
-        // Only play and show the item if it's ready.
-        if (item.isReady) {
-          this._show(index);
-          this._sendCommand(item, "play");
-        }
+      // Only play and show the item if it's ready.
+      if ((item !== null) && item.isReady) {
+        this._show(index);
+        this._sendCommand(item, "play");
       }
     },
 
     /**
-     * Play the next item in a playlist.
+     * Suspend playback of a playlist item.
      */
-    _playNext: function(index, command) {
-      var item = this._getItem(index),
-        nextIndex = (index + 1 < this._items.length) ? (index + 1) : 0;
+    _suspend: function(index, command) {
+      var item = this._getItem(index);
 
       if (item !== null) {
-        // Current playlist item
         this._hide(index);
         this._sendCommand(item, command);
+      }
+    },
 
-        // Next playlist item
+    /**
+     * Play the next item in the playlist.
+     */
+    _playNext: function(index) {
+      var duration,
+        nextIndex = this._getNextIndex(index),
+        nextItem = this._getItem(nextIndex);
+
+      // Suspend current item.
+      this._suspend(index, "pause");
+
+      // Play next item.
+      if ((nextItem !== null) && nextItem.isReady) {
+        duration = nextItem.duration;
+
+        // Ensure the item plays for its specified duration.
+        if (duration !== 0) {
+          this.debounce("play-next", function() {
+            this._playNext(nextIndex);
+          }, duration);
+        }
+
         this.play(nextIndex);
       }
     },
@@ -198,14 +190,30 @@
      * Pause a playlist item.
      */
     pause: function(index) {
-      this._playNext(index, "pause");
+      this._suspend(index, "pause");
     },
 
     /**
      * Stop a playlist item.
      */
     stop: function(index) {
-      this._playNext(index, "stop");
+      this._suspend(index, "stop");
+    },
+
+    /**
+     * Handle the rise-component-done event.
+     */
+    _handleDone: function(e) {
+      // Find the playlist item that fired the event.
+      for (var index = 0; index < this._items.length; index++) {
+        if (this._items[index].id === e.target.id) {
+          this._playNext(index);
+
+          break;
+        }
+      }
+
+      e.stopPropagation();
     },
 
     /************************************** HELPER FUNCTIONS **************************************/
@@ -281,6 +289,13 @@
       }
 
       return duration * 1000;
+    },
+
+    /**
+     * Get the index of the next playlist item.
+     */
+    _getNextIndex: function(index) {
+      return (index + 1 < this._items.length) ? (index + 1): 0;
     },
 
     /**

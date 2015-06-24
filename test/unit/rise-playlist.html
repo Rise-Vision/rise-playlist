@@ -137,9 +137,25 @@
         test("should show playlist item when played", function() {
           assert.equal(first.style.display, "block");
         });
+      });
 
-        test("should hide all other playlist items", function() {
-          assert.equal(second.style.display, "none");
+      suite("_suspend", function() {
+        suiteSetup(function() {
+          pauseSpy = sinon.spy(playlist._items[0], "pause");
+        });
+
+        suiteTeardown(function() {
+          playlist._items[0].pause.restore();
+        });
+
+        test("should pause playlist item", function() {
+          playlist._suspend(0, "pause");
+
+          assert(pauseSpy.calledOnce);
+        });
+
+        test("should hide playlist item when paused", function() {
+          assert.equal(first.style.display, "none");
         });
       });
 
@@ -147,34 +163,20 @@
         suiteSetup(function() {
           pauseSpy = sinon.spy(playlist._items[0], "pause");
           playSpy = sinon.spy(playlist._items[1], "play");
-          stopSpy = sinon.spy(playlist._items[1], "stop");
         });
 
         suiteTeardown(function() {
           playlist._items[0].pause.restore();
           playlist._items[1].play.restore();
-          playlist._items[0].play.restore();
-          playlist._items[1].stop.restore();
         });
 
         test("should pause playlist item", function() {
-          playlist._playNext(0, "pause");
+          playlist._playNext(0);
 
           assert(pauseSpy.calledOnce);
         });
 
-        test("should play next playlist item when paused", function() {
-          assert(playSpy.calledOnce);
-        });
-
-        test("should stop playlist item", function() {
-          playSpy = sinon.spy(playlist._items[0], "play");
-          playlist._playNext(1, "stop");
-
-          assert(stopSpy.calledOnce);
-        });
-
-        test("should play next playlist item when stopped", function() {
+        test("should play next playlist item", function() {
           assert(playSpy.calledOnce);
         });
       });
@@ -182,12 +184,10 @@
       suite("pause", function() {
         suiteSetup(function() {
           pauseSpy = sinon.spy(playlist._items[0], "pause");
-          playSpy = sinon.spy(playlist._items[1], "play");
         });
 
         suiteTeardown(function() {
           playlist._items[0].pause.restore();
-          playlist._items[1].play.restore();
         });
 
         test("should pause the current playlist item", function() {
@@ -196,20 +196,18 @@
           assert(pauseSpy.calledOnce);
         });
 
-        test("should play the next playlist item", function() {
-          assert(playSpy.calledOnce);
+        test("should hide the current playlist item", function() {
+          assert(playlist._items[0].element.style.display === "none");
         });
       });
 
       suite("stop", function() {
         suiteSetup(function() {
           stopSpy = sinon.spy(playlist._items[0], "stop");
-          playSpy = sinon.spy(playlist._items[1], "play");
         });
 
         suiteTeardown(function() {
           playlist._items[0].stop.restore();
-          playlist._items[1].play.restore();
         });
 
         test("should stop the current playlist item", function() {
@@ -218,8 +216,8 @@
           assert(stopSpy.calledOnce);
         });
 
-        test("should play the next playlist item", function() {
-          assert(playSpy.calledOnce);
+        test("should hide the current playlist item", function() {
+          assert(playlist._items[0].element.style.display === "none");
         });
       });
 
