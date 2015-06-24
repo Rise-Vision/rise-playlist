@@ -66,39 +66,6 @@
         assert(item1.style.display === "none", "item-1 is hidden");
         assert(item2.style.display === "none", "item-2 is hidden");
       });
-
-      test("should hide item-1 for its entire duration", function() {
-        assert(item1.style.display === "none", "item-1 is hidden");
-
-        clock.tick(9999);
-
-        assert(item1.style.display === "none", "item-1 is still hidden");
-      });
-
-      test("should play and show item-2", function() {
-        assert(item2.style.display === "none", "item-2 is hidden");
-        assert(playSpy.notCalled, "item-2 is not playing");
-
-        clock.tick(1);
-
-        assert(item2.style.display === "block", "item-2 is visible");
-        assert(playSpy.calledOnce, "item-2 is playing");
-      });
-
-      test("should pause and hide item-2", function() {
-        clock.tick(5000);
-
-        assert(item2.style.display === "none", "item-2 is hidden");
-        assert(pauseSpy.calledOnce, "item-2 is paused");
-      });
-
-      test("should hide item-1 for its entire duration after the last playlist item has finished", function() {
-        assert(item1.style.display === "none", "item-1 is hidden");
-
-        clock.tick(9999);
-
-        assert(item1.style.display === "none", "item-1 is still hidden");
-      });
     });
   </script>
 </body>
