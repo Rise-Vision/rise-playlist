@@ -76,6 +76,15 @@
           assert.equal(playlist._items.length, 2, "length");
           assert.equal(playlist._items[1].id, "item-2", "id");
         });
+
+        test("should not add a new element to _items if a content component does not have an id attribute", function() {
+          var item1 = document.querySelector("#item-1");
+
+          item1.removeAttribute("id");
+          playlist._addItem(singleItem);
+
+          assert.equal(playlist._items.length, 2, "length");
+        });
       });
 
       suite("_getContentElement", function() {
