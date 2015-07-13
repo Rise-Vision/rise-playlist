@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Playlist - Distribution</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../../rise-page/rise-page.html">
+  <link rel="import" href="../../../rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="../../../rise-distribution/rise-distribution.html">
+  <link rel="import" href="../../rise-playlist.html">
+  <link rel="import" href="../../demo-component.html">
+</head>
+<body>
+  <rise-page id="page" display-id="dummy-id">
+
+    <rise-playlist id="match">
+
+      <rise-playlist-item>
+        <demo-component id="item-1"></demo-component>
+        <rise-distribution distribution='[{"id":"dummy-id"}]'></rise-distribution>
+      </rise-playlist-item>
+
+    </rise-playlist>
+
+    <rise-playlist id="no-match">
+
+      <rise-playlist-item>
+        <demo-component id="item-2"></demo-component>
+        <rise-distribution distribution='[{"id":"abc123"}]'></rise-distribution>
+      </rise-playlist-item>
+
+    </rise-playlist>
+
+    <rise-playlist id="no-distribution">
+
+      <rise-playlist-item>
+        <demo-component id="item-3"></demo-component>
+      </rise-playlist-item>
+
+    </rise-playlist>
+
+  </rise-page>
+
+  <script>
+    suite("distribution", function() {
+      suiteSetup(function() {
+        var items = document.getElementsByTagName("demo-component");
+
+        for (var i = 0; i < items.length; i++) {
+          items[i].onReady();
+        }
+      });
+
+      suite("_canPlay", function() {
+        test("should return true if a playlist item has a distribution matching the Display ID", function() {
+          var playlist = document.getElementById("match");
+
+          assert.isTrue(playlist._canPlay(playlist._items[0]));
+        });
+
+        test("should return false if a playlist item does not have a distribution matching the Display ID", function() {
+          var playlist = document.getElementById("no-match");
+
+          playlist._addItem(Polymer.dom(playlist.$.items).getDistributedNodes()[0]);
+          assert.isFalse(playlist._canPlay(playlist._items[0]));
+        });
+
+        test("should return true if a playlist item does not have a distribution", function() {
+          var playlist = document.getElementById("no-distribution");
+
+          assert.isTrue(playlist._canPlay(playlist._items[0]));
+        });
+      });
+    });
+  </script>
+</body>
+</html>

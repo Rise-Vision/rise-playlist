@@ -47,6 +47,11 @@
      */
     _loadingDelay: 5000,
 
+    /**
+     * The Display ID from the containing page element.
+     */
+     _displayId: "",
+
     /************************************** INITIALIZATION **************************************/
 
     /**
@@ -56,6 +61,7 @@
       var nodes = Polymer.dom(this.$.items).getDistributedNodes();
 
       this._items = [];
+      this._displayId = this._getDisplayId();
 
       for (var i = 0; i < nodes.length; i++) {
         if (nodes[i].nodeType === 1) {
@@ -73,6 +79,9 @@
       }, this._loadingDelay);
     },
 
+    /**
+     * Dispatch rise-playlist-ready to indicate that the playlist has initialized.
+     */
     _dispatchReady: function() {
       var readyEvent = new CustomEvent("rise-playlist-ready", {
         "detail": {
@@ -95,24 +104,32 @@
         return;
       }
 
-      item.isReady = true;
+      // Check the distribution to see if the playlist item should play on this Display.
+      if (this._canPlay(item)) {
+        item.isReady = true;
 
-      if (e.detail) {
-        if (e.detail.play) {
-          item.play = e.detail.play;
-        }
+        if (e.detail) {
+          if (e.detail.play) {
+            item.play = e.detail.play;
+          }
 
-        if (e.detail.pause) {
-          item.pause = e.detail.pause;
-        }
+          if (e.detail.pause) {
+            item.pause = e.detail.pause;
+          }
 
-        if (e.detail.stop) {
-          item.stop = e.detail.stop;
-        }
+          if (e.detail.stop) {
+            item.stop = e.detail.stop;
+          }
 
-        if (e.detail.done) {
-          item.done = e.detail.done;
+          if (e.detail.done) {
+            item.done = e.detail.done;
+          }
         }
+      }
+      // Hide and remove the playlist item from the master array of items.
+      else {
+        item.element.style.display = "none";
+        this._items = _.without(this._items, item);
       }
 
       this._numItems++;
@@ -123,6 +140,72 @@
       }
 
       e.stopPropagation();
+    },
+
+    /**************************************** DISTRIBUTION ****************************************/
+
+    /**
+     * Determine whether or not to play a playlist item based on its distribution and the
+     * Display ID of the page.
+     */
+    _canPlay: function(content) {
+      var item = null,
+        nodes = null,
+        node = null,
+        distribution = null,
+        found = false;
+
+      if (content.element) {
+        item = content.element.parentNode;
+
+        // Find the rise-distribution element.
+        if (item && item.hasChildNodes()) {
+          nodes = item.childNodes;
+
+          for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+
+            if ((node.nodeType === 1) && (node.nodeName === "RISE-DISTRIBUTION")) {
+              found = true;
+
+              // Check if any of the distribution values match the Display ID.
+              try {
+                distribution = JSON.parse(node.getAttribute("distribution"));
+
+                if (distribution !== null) {
+                  for (var j = 0; j < distribution.length; j++) {
+                    if (distribution[j].id === this._displayId) {
+                      return true;
+                    }
+                  }
+                }
+              }
+              catch (e) {
+                console.log(e);
+              }
+            }
+          }
+        }
+      }
+
+      // Play the playlist item even if there is no rise-distribution element.
+      if (!found) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    },
+
+    /**
+     * Get the Display ID from the containing page element.
+     */
+    _getDisplayId: function() {
+      if (this.parentNode && (this.parentNode.nodeName === "RISE-PAGE")) {
+        return this.parentNode.getDisplayId();
+      }
+
+      return "";
     },
 
     /****************************************** PLAYBACK ******************************************/
@@ -230,12 +313,14 @@
       contentElement = this._getContentElement(playlistItem);
 
       if (contentElement) {
-        item.isReady = false;
-        item.duration = duration;
-        item.id = contentElement.id;
-        item.element = contentElement;
+        if (contentElement.id !== "") {
+          item.isReady = false;
+          item.duration = duration;
+          item.id = contentElement.id;
+          item.element = contentElement;
 
-        this._items.push(item);
+          this._items.push(item);
+        }
       }
     },
 

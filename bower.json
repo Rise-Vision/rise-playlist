@@ -19,10 +19,12 @@
   ],
   "dependencies": {
     "polymer": "#^1.0.0",
+    "rise-distribution": "https://github.com/Rise-Vision/web-component-rise-distribution.git",
+    "rise-page": "https://github.com/Rise-Vision/web-component-rise-page.git",
+    "rise-playlist-item": "https://github.com/Rise-Vision/web-component-rise-playlist-item.git#1.0.2",
     "underscore": "~1.8.2"
   },
   "devDependencies": {
-    "rise-playlist-item": "https://github.com/Rise-Vision/web-component-rise-playlist-item.git#1.0.2",
     "web-component-tester": "~3.1.3"
   }
 }
