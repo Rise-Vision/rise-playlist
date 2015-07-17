@@ -25,7 +25,7 @@ Next, construct your HTML page. You should include `webcomponents-lite.min.js` b
     <link rel="import" href="bower_components/web-component-rise-playlist-item/rise-playlist-item.html">
   </head>
   <body>
-    <rise-playlist intro="fade-in" outro="fade-out">
+    <rise-playlist id="playlist" intro="fade-in" outro="fade-out">
       <rise-playlist-item duration="5">
         <!-- Content components go here -->
       </rise-playlist-item>
@@ -35,10 +35,12 @@ Next, construct your HTML page. You should include `webcomponents-lite.min.js` b
 ```
 
 ### Attributes
-| Attribute             | Type                                               | Default |
-| --------------------- | -------------------------------------------------- | :-----: |
-| `intro` (optional)    | `<string>` CSS class name for an intro transition. | `''`    |
-| `outro` (optional)    | `<string>` CSS class name for an outro transition. | `''`    |
+| Attribute             | Type                                                                                     | Default |
+| --------------------- | ---------------------------------------------------------------------------------------- | :-----: |
+| `id` (required)       | `<string>` Name of your playlist, which can be anything for example: id="playlist".      | `''`    |
+| `intro` (optional)    | `<string>` CSS class name for an intro transition.                                       | `''`    |
+| `outro` (optional)    | `<string>` CSS class name for an outro transition.                                       | `''`    |
+
 
 ### Building Content Components
 When building a content component for use with `rise-playlist`, you must dispatch the `rise-component-ready` event once the component has initialized and is ready for display. This event takes as a parameter an object of the following form:
