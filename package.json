@@ -1,6 +1,6 @@
 {
-  "name": "web-component-rise-playlist",
-  "version": "1.0.4",
+  "name": "rise-playlist",
+  "version": "1.0.0",
   "description": "The Rise Playlist web component rotates between different pieces of content on an HTML page.",
   "scripts": {
     "test": "gulp test",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Rise-Vision/web-component-rise-playlist.git"
+    "url": "https://github.com/Rise-Vision/rise-playlist.git"
   },
   "keywords": [
     "polymer",
@@ -20,9 +20,9 @@
   "author": "Rise Vision",
   "license": "GPLv3",
   "bugs": {
-    "url": "https://github.com/Rise-Vision/web-component-rise-playlist/issues"
+    "url": "https://github.com/Rise-Vision/rise-playlist/issues"
   },
-  "homepage": "https://github.com/Rise-Vision/web-component-rise-playlist",
+  "homepage": "https://github.com/Rise-Vision/rise-playlist",
   "devDependencies": {
     "gulp": "^3.8.10",
     "gulp-bump": "^0.1.11",

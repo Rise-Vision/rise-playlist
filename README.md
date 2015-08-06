@@ -1,18 +1,17 @@
 # Rise Playlist Web Component
 
 ## Introduction
-`rise-playlist` is a web component that rotates between different pieces of content on an HTML page. Each piece of content is wrapped inside of a [`rise-playlist-item`](https://github.com/Rise-Vision/web-component-rise-playlist-item) web component.
-
-`rise-playlist` works in conjunction with [Rise Vision](http://www.risevision.com), the [digital signage management application](http://rva.risevision.com/) that runs on [Google Cloud](https://cloud.google.com).
+`rise-playlist` is a Polymer Web Component that works with [Rise Vision](https://www.risevision.com/), the digital signage management application for [Web Designers](http://risevision.com/web-designers). Its purpose is to rotate between different pieces of content on an HTML page.
 
 At this time Chrome is the only browser that this project and Rise Vision supports.
 
 ## Usage
-To begin, you will need to install `rise-playlist` and `rise-playlist-item` using Bower:
+To begin, you will need to install the following components using Bower:
 
 ```
-bower install https://github.com/Rise-Vision/web-component-rise-playlist.git
-bower install https://github.com/Rise-Vision/web-component-rise-playlist-item.git
+bower install https://github.com/Rise-Vision/rise-page.git
+bower install https://github.com/Rise-Vision/rise-playlist.git
+bower install https://github.com/Rise-Vision/rise-playlist-item.git
 ```
 
 Next, construct your HTML page. You should include `webcomponents-lite.min.js` before any code that touches the DOM, and load the web components using HTML imports. For example:
@@ -21,26 +20,21 @@ Next, construct your HTML page. You should include `webcomponents-lite.min.js` b
 <html>
   <head>
     <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-    <link rel="import" href="bower_components/web-component-rise-playlist/rise-playlist.html">
-    <link rel="import" href="bower_components/web-component-rise-playlist-item/rise-playlist-item.html">
+    <link rel="import" href="bower_components/rise-page/rise-page.html">
+    <link rel="import" href="bower_components/rise-playlist/rise-playlist.html">
+    <link rel="import" href="bower_components/rise-playlist-item/rise-playlist-item.html">
   </head>
   <body>
-    <rise-playlist id="playlist" intro="fade-in" outro="fade-out">
-      <rise-playlist-item duration="5">
-        <!-- Content components go here -->
-      </rise-playlist-item>
-    </rise-playlist>
+    <rise-page id="page" display-id="your-display-id">
+      <rise-playlist id="playlist" intro="fade-in" outro="fade-out">
+        <rise-playlist-item duration="3">
+          <!-- Content components go here -->
+        </rise-playlist-item>
+      </rise-playlist>
+    </rise-page>
   </body>
 </html>
 ```
-
-### Attributes
-| Attribute             | Type                                                                                     | Default |
-| --------------------- | ---------------------------------------------------------------------------------------- | :-----: |
-| `id` (required)       | `<string>` Name of your playlist, which can be anything for example: id="playlist".      | `''`    |
-| `intro` (optional)    | `<string>` CSS class name for an intro transition.                                       | `''`    |
-| `outro` (optional)    | `<string>` CSS class name for an outro transition.                                       | `''`    |
-
 
 ### Building Content Components
 When building a content component for use with `rise-playlist`, you must dispatch the `rise-component-ready` event once the component has initialized and is ready for display. This event takes as a parameter an object of the following form:
@@ -77,7 +71,8 @@ If a component supports play until done, it must dispatch the `rise-component-do
 this.dispatchEvent(new CustomEvent("rise-component-done", { "bubbles": true }));
 ```
 
-Please see the [`test/rise-demo.html`](https://github.com/Rise-Vision/web-component-rise-playlist/blob/master/test/rise-demo.html) file for an example of the basic structure of a content component.
+## Documentation
+For further documentation on `rise-playlist` properties, methods, usage, and a comprehensive demo, please see [here](http://rise-vision.github.io/rise-playlist).
 
 ## Built With
 - [Polymer](https://www.polymer-project.org/)
@@ -110,8 +105,8 @@ To make changes to the web component, you'll first need to install the dependenc
 
 The web component can now be installed by executing the following commands in Terminal:
 ```
-git clone https://github.com/Rise-Vision/web-component-rise-playlist.git
-cd web-component-rise-playlist
+git clone https://github.com/Rise-Vision/rise-playlist.git
+cd rise-playlist
 npm install
 bower install
 ```
@@ -121,11 +116,28 @@ To access the demo locally, run the `polyserve` command in Terminal.
 
 In your browser, navigate to:
 ```
-localhost:8080/components/rise-playlist/demo.html
+http://localhost:8080/components/rise-playlist/demo/
+```
+
+### Testing
+You can run the suite of tests from the command line or via a local web server using Polyserve.
+
+#### Command Line
+Execute the following command in Terminal to run the tests:
+```
+gulp test
+```
+
+#### Local Server
+Run the `polyserve` command in Terminal.
+
+In your browser, navigate to:
+```
+http://localhost:8080/components/rise-playlist/test/
 ```
 
 ### Deployment
-Once you are satisifed with your changes, deploy `rise-playlist.html`, as well as the `polymer`, `webcomponentsjs`, `underscore` and `web-component-rise-playlist-item` folders to your server. You can then use the web component by following the *Usage* instructions above.
+Once you are satisifed with your changes, deploy `rise-playlist.html`, as well as the `polymer`, `webcomponentsjs`, `underscore` and `rise-playlist-item` folders to your server. You can then use the web component by following the *Usage* instructions above.
 
 ## Submitting Issues
 If you encounter problems or find defects we really want to hear about them. If you could take the time to add them as issues to this Repository it would be most appreciated. When reporting issues, please use the following format where applicable:

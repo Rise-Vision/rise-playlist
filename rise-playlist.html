@@ -2,6 +2,22 @@
 
 <script src="../underscore/underscore.js"></script>
 
+<!--
+`rise-playlist` is a Polymer Web Component that works with <a href="https://www.risevision.com/">Rise Vision</a>, the digital signage management application for <a href="http://risevision.com/web-designers">Web Designers</a>. Its purpose is to rotate between different pieces of content on an HTML page.
+
+### Example Usage
+
+      <rise-page id="page" display-id="your-display-id">
+        <rise-playlist id="playlist">
+          <rise-playlist-item duration="3">
+            <demo-component id="apple" src="https://url.to.apple.png"></demo-component>
+          </rise-playlist-item>
+        </rise-playlist>
+      </rise-page>
+
+@demo demo/
+-->
+
 <dom-module id="rise-playlist">
   <template>
     <content id="items" select="rise-playlist-item"></content>
@@ -11,7 +27,10 @@
 
 <script>
   /* global Polymer, _ */
-  /*jshint newcap: false */
+  /* jshint newcap: false */
+</script>
+
+<script>
   Polymer({
     is: "rise-playlist",
 
@@ -80,7 +99,7 @@
     },
 
     /**
-     * Dispatch rise-playlist-ready to indicate that the playlist has initialized.
+     * Dispatches rise-playlist-ready to indicate that the playlist has initialized.
      */
     _dispatchReady: function() {
       var readyEvent = new CustomEvent("rise-playlist-ready", {
@@ -94,7 +113,7 @@
     },
 
     /**
-     * Add more details about a particular content element once it's ready.
+     * Adds more details about a particular content element once it's ready.
      */
     _handleReady: function(e) {
       var item = _.findWhere(this._items, { id: e.target.id });
@@ -145,7 +164,7 @@
     /**************************************** DISTRIBUTION ****************************************/
 
     /**
-     * Determine whether or not to play a playlist item based on its distribution and the
+     * Determines whether or not to play a playlist item based on its distribution and the
      * Display ID of the page.
      */
     _canPlay: function(content) {
@@ -198,7 +217,7 @@
     },
 
     /**
-     * Get the Display ID from the containing page element.
+     * Returns the Display ID from the containing page element.
      */
     _getDisplayId: function() {
       if (this.parentNode && (this.parentNode.nodeName === "RISE-PAGE")) {
@@ -211,7 +230,7 @@
     /****************************************** PLAYBACK ******************************************/
 
     /**
-     * Start playlist playback.
+     * Starts playlist playback.
      */
     _start: function() {
       if (this._items.length > 0) {
@@ -220,7 +239,7 @@
     },
 
     /**
-     * Play a playlist item.
+     * Plays a playlist item.
      */
     play: function(index) {
       var item = this._getItem(index);
@@ -233,7 +252,7 @@
     },
 
     /**
-     * Suspend playback of a playlist item.
+     * Suspends playback of a playlist item.
      */
     _suspend: function(index, command) {
       var item = this._getItem(index);
@@ -245,7 +264,7 @@
     },
 
     /**
-     * Play the next item in the playlist.
+     * Plays the next item in the playlist.
      */
     _playNext: function(index) {
       var duration,
@@ -271,21 +290,21 @@
     },
 
     /**
-     * Pause a playlist item.
+     * Pauses a playlist item.
      */
     pause: function(index) {
       this._suspend(index, "pause");
     },
 
     /**
-     * Stop a playlist item.
+     * Stops a playlist item.
      */
     stop: function(index) {
       this._suspend(index, "stop");
     },
 
     /**
-     * Handle the rise-component-done event.
+     * Handles the rise-component-done event.
      */
     _handleDone: function(e) {
       // Find the playlist item that fired the event.
@@ -303,7 +322,7 @@
     /************************************** HELPER FUNCTIONS **************************************/
 
     /**
-     * Add the content element of a playlist item to _items.
+     * Adds the content element of a playlist item to _items.
      */
     _addItem: function(playlistItem) {
       var item = {},
@@ -325,7 +344,7 @@
     },
 
     /**
-     * Get the content element nested inside of the playlist item.
+     * Returns the content element nested inside of the playlist item.
      */
     _getContentElement: function(playlistItem) {
       var children = null;
@@ -344,7 +363,7 @@
     },
 
     /**
-     * Get a playlist item by index.
+     * Returns a playlist item by index.
      */
     _getItem: function(index) {
       var itemsLength = this._items.length;
@@ -357,7 +376,7 @@
     },
 
     /**
-     * Get the duration of a playlist item.
+     * Returns the duration of a playlist item.
      */
     _getDuration: function(playlistItem) {
       var duration = 0;
@@ -378,14 +397,14 @@
     },
 
     /**
-     * Get the index of the next playlist item.
+     * Returns the index of the next playlist item.
      */
     _getNextIndex: function(index) {
       return (index + 1 < this._items.length) ? (index + 1): 0;
     },
 
     /**
-     * Hide all playlist items.
+     * Hides all playlist items.
      */
     _hideAll: function() {
       for (var i = 0; i < this._items.length; i++) {
@@ -394,7 +413,7 @@
     },
 
     /**
-     * Hide playlist item.
+     * Hides a playlist item.
      */
     _hide: function(index) {
       var item = this._getItem(index);
@@ -414,7 +433,7 @@
     },
 
     /**
-     * Show playlist item.
+     * Shows a playlist item.
      */
     _show: function(index) {
       var item = this._getItem(index);
@@ -434,7 +453,7 @@
     },
 
     /**
-     * Send a command to a playlist item.
+     * Sends a command to a playlist item.
      */
     _sendCommand: function(item, command) {
       if (item.hasOwnProperty(command)) {
