@@ -55,24 +55,24 @@
         }
       });
 
-      suite("_canPlay", function() {
+      suite("_checkDistribution", function() {
         test("should return true if a playlist item has a distribution matching the Display ID", function() {
           var playlist = document.getElementById("match");
 
-          assert.isTrue(playlist._canPlay(playlist._items[0]));
+          assert.isTrue(playlist._checkDistribution(playlist._items[0].element));
         });
 
         test("should return false if a playlist item does not have a distribution matching the Display ID", function() {
           var playlist = document.getElementById("no-match");
 
           playlist._addItem(Polymer.dom(playlist.$.items).getDistributedNodes()[0]);
-          assert.isFalse(playlist._canPlay(playlist._items[0]));
+          assert.isFalse(playlist._checkDistribution(playlist._items[0].element));
         });
 
         test("should return true if a playlist item does not have a distribution", function() {
           var playlist = document.getElementById("no-distribution");
 
-          assert.isTrue(playlist._canPlay(playlist._items[0]));
+          assert.isTrue(playlist._checkDistribution(playlist._items[0].element));
         });
       });
     });

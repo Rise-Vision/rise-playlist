@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Playlist - Timeline</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../../rise-page/rise-page.html">
+  <link rel="import" href="../../../rise-playlist-item/rise-playlist-item.html">
+  <link rel="import" href="../../../rise-timeline/rise-timeline.html">
+  <link rel="import" href="../../rise-playlist.html">
+  <link rel="import" href="../../demo/demo-component.html">
+</head>
+<body>
+  <rise-page id="page" display-id="dummy-id">
+
+    <rise-playlist id="playlist">
+
+      <rise-playlist-item>
+        <demo-component id="item-1"></demo-component>
+        <rise-timeline start-time="1:00 AM" end-time="11:59 PM"></rise-timeline>
+      </rise-playlist-item>
+
+      <rise-playlist-item>
+        <demo-component id="item-2"></demo-component>
+        <rise-timeline start-time="12:00 AM" end-time="1:00 AM"></rise-timeline>
+      </rise-playlist-item>
+
+      <rise-playlist-item>
+        <demo-component id="item-3"></demo-component>
+      </rise-playlist-item>
+
+    </rise-playlist>
+
+  </rise-page>
+
+  <script>
+    suite("timeline", function() {
+      var playlist = document.getElementById("playlist");
+
+      suiteSetup(function() {
+        var items = document.getElementsByTagName("demo-component");
+
+        for (var i = 0; i < items.length; i++) {
+          items[i].onReady();
+        }
+      });
+
+      suite("checkTimeline", function() {
+        test("should return true if an item is scheduled to play", function() {
+          assert.isTrue(playlist.checkTimeline(0));
+        });
+
+        test("should return false if an item is not scheduled to play", function() {
+          assert.isFalse(playlist.checkTimeline(1));
+        });
+
+        test("should return true if an item does not have a timeline", function() {
+          assert.isTrue(playlist.checkTimeline(2));
+        });
+      });
+    });
+  </script>
+</body>
+</html>

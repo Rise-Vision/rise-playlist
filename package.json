@@ -1,6 +1,6 @@
 {
   "name": "rise-playlist",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The Rise Playlist web component rotates between different pieces of content on an HTML page.",
   "scripts": {
     "test": "gulp test",
