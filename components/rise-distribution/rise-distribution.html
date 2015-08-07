@@ -1,0 +1,37 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="rise-distribution">
+</dom-module>
+
+<script>
+  /* global Polymer */
+  /* jshint newcap: false */
+  Polymer({
+    is: "rise-distribution",
+
+    properties: {
+      /**
+       * The Display IDs for the Displays that content will be shown on.
+       */
+      distribution: {
+        type: Array,
+        value: function () {
+          return [];
+        }
+      }
+    },
+
+    /**
+     * Check if any of the distribution values match the Display ID.
+     */
+    canPlay: function(displayId) {
+      for (var i = 0; i < this.distribution.length; i++) {
+        if (this.distribution[i].id === displayId) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+  });
+</script>

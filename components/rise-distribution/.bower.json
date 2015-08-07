@@ -1,0 +1,35 @@
+{
+  "name": "rise-distribution",
+  "authors": [
+    "Rise Vision"
+  ],
+  "description": "Rise Vision web component that controls the visibility of content on a Display",
+  "main": "rise-distribution.html",
+  "keywords": [
+    "polymer",
+    "web-components"
+  ],
+  "license": "GPLv3",
+  "homepage": "https://github.com/Rise-Vision/web-component-rise-distribution",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components",
+    "test"
+  ],
+  "dependencies": {
+    "polymer": "^1.0.0"
+  },
+  "devDependencies": {
+    "web-component-tester": "~3.3.0"
+  },
+  "_release": "f941798e7f",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "f941798e7fb8b31b8756fbacf04594ae0fddff31"
+  },
+  "_source": "https://github.com/Rise-Vision/rise-distribution.git",
+  "_target": "*",
+  "_originalSource": "https://github.com/Rise-Vision/rise-distribution.git"
+}

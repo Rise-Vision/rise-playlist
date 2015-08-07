@@ -1,0 +1,35 @@
+{
+  "name": "rise-distribution",
+  "version": "1.0.0",
+  "description": "The Rise distribution web component that controls the visibility of content on a Display.",
+  "scripts": {
+    "test": "gulp test",
+    "build": "gulp build"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rise-Vision/web-component-rise-distribution.git"
+  },
+  "keywords": [
+    "polymer",
+    "web-components"
+  ],
+  "author": "Rise Vision",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/Rise-Vision/web-component-rise-distribution/issues"
+  },
+  "homepage": "https://github.com/Rise-Vision/web-component-rise-distribution",
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-bump": "^0.3.0",
+    "gulp-jshint": "^1.10.0",
+    "gulp-watch": "^4.2.4",
+    "jshint-stylish": "^1.0.1",
+    "run-sequence": "^1.0.2",
+    "web-component-tester": "^3.3.0"
+  }
+}
