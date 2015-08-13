@@ -36,6 +36,10 @@ Next, construct your HTML page. You should include `webcomponents-lite.min.js` b
 </html>
 ```
 
+If you would like to control content visibility by Display ID, please see the [`rise-distribution` component](https://github.com/Rise-Vision/rise-distribution).
+
+If you would like to control content visibility by timeline settings, please see the [`rise-timeline` component](https://github.com/Rise-Vision/rise-timeline).
+
 ### Building Content Components
 When building a content component for use with `rise-playlist`, you must dispatch the `rise-component-ready` event once the component has initialized and is ready for display. This event takes as a parameter an object of the following form:
 ```
@@ -64,7 +68,7 @@ var readyEvent = new CustomEvent("rise-component-ready", {
 this.dispatchEvent(readyEvent);
 ```
 
-The component has 30 seconds in which to initialize and dispatch the `rise-component-ready` event. After that, only components that have reported as ready will display. Components that are skipped will have their playlist item duration (if specified) added to the duration of the subsequent playlist item.
+The component has 30 seconds in which to initialize and dispatch the `rise-component-ready` event. After that, only components that have reported as ready will display.
 
 If a component supports play until done, it must dispatch the `rise-component-done` event once a full playback cycle has completed. This event takes no parameters. For example, the following code will dispatch this event:
 ```

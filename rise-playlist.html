@@ -21,7 +21,7 @@
 <dom-module id="rise-playlist">
   <template>
     <content id="items" select="rise-playlist-item"></content>
-    <content id="distribution" select="rise-distribution"></content>
+    <content></content>
   </template>
 </dom-module>
 
@@ -124,7 +124,7 @@
       }
 
       // Check the distribution to see if the playlist item should play on this Display.
-      if (this._canPlay(item)) {
+      if (this._checkDistribution(item.element)) {
         item.isReady = true;
 
         if (e.detail) {
@@ -161,59 +161,59 @@
       e.stopPropagation();
     },
 
+    /****************************************** TIMELINE ******************************************/
+
+    /**
+     * Check whether or not to play an item based on its timeline.
+     */
+     checkTimeline: function(index) {
+      var item = this._getItem(index),
+        playlistItem = item.element.parentElement,
+        timeline = null;
+
+      if (playlistItem !== null) {
+        timeline = playlistItem.querySelector("rise-timeline");
+
+        if (timeline !== null) {
+          return timeline.canPlay();
+        }
+      }
+
+      // Play the item even if there is no rise-timeline element.
+      return true;
+    },
+
     /**************************************** DISTRIBUTION ****************************************/
 
     /**
-     * Determines whether or not to play a playlist item based on its distribution and the
-     * Display ID of the page.
+     * Determine whether or not to play an item based on its distribution.
      */
-    _canPlay: function(content) {
-      var item = null,
-        nodes = null,
-        node = null,
-        distribution = null,
-        found = false;
+    _checkDistribution: function(element) {
+      var playlistItem = element.parentElement,
+        distributionElem, distribution;
 
-      if (content.element) {
-        item = content.element.parentNode;
+      if (playlistItem !== null) {
+        distributionElem = playlistItem.querySelector("rise-distribution");
 
-        // Find the rise-distribution element.
-        if (item && item.hasChildNodes()) {
-          nodes = item.childNodes;
+        if (distributionElem !== null) {
+          distribution = JSON.parse(distributionElem.getAttribute("distribution"));
 
-          for (var i = 0; i < nodes.length; i++) {
-            node = nodes[i];
-
-            if ((node.nodeType === 1) && (node.nodeName === "RISE-DISTRIBUTION")) {
-              found = true;
-
-              // Check if any of the distribution values match the Display ID.
-              try {
-                distribution = JSON.parse(node.getAttribute("distribution"));
-
-                if (distribution !== null) {
-                  for (var j = 0; j < distribution.length; j++) {
-                    if (distribution[j].id === this._displayId) {
-                      return true;
-                    }
-                  }
-                }
-              }
-              catch (e) {
-                console.log(e);
+          // Check if any of the distribution values match the Display ID of the page.
+          if (distribution !== null) {
+            for (var j = 0; j < distribution.length; j++) {
+              if (distribution[j].id === this._displayId) {
+                return true;
               }
             }
           }
         }
+        else {
+           // Play the item even if there is no rise-distribution element.
+          return true;
+        }
       }
 
-      // Play the playlist item even if there is no rise-distribution element.
-      if (!found) {
-        return true;
-      }
-      else {
-        return false;
-      }
+      return false;
     },
 
     /**
@@ -244,7 +244,7 @@
     play: function(index) {
       var item = this._getItem(index);
 
-      // Only play and show the item if it's ready.
+      // Only play the item if it's ready.
       if ((item !== null) && item.isReady) {
         this._show(index);
         this._sendCommand(item, "play");
